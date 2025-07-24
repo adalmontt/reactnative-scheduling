@@ -3,15 +3,12 @@ export const formatNumberWithDots = (number) => {
 };
 
 
-export const formatDate = (dateString) => {
-  // If already in dd/mm/yyyy format, return as-is
-  if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
-    return dateString;
-  }
+export const formatDate = (dateInput) => {
+  const date = new Date(dateInput);
 
-  // Otherwise, parse and format as dd/mm/yyyy
-  const date = new Date(dateString);
-  if (isNaN(date)) return ''; // fallback for invalid date
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    return ''; // return empty string if invalid
+  }
 
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -19,7 +16,6 @@ export const formatDate = (dateString) => {
 
   return `${day}/${month}/${year}`;
 };
-
 
 export const formatNumberWithDotsInput = (value) => {
   const digitsOnly = value.replace(/\D/g, ''); // keep only digits
@@ -64,7 +60,7 @@ export const groupByMonthYear = (data, key = 'fecha') => {
     if (typeof d !== 'string') return new Date(d);
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) {
       const [day, month, year] = d.split('/');
-      return new Date(`${year}-${month}-${day}`);
+      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     }
     return new Date(d);
   };

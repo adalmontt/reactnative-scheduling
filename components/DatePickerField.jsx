@@ -27,6 +27,7 @@ const DatePickerField = ({ label, date, setDate }) => {
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={onChange}
+          locale="es-ES"
         />
       )}
     </>

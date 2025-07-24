@@ -8,6 +8,7 @@ import Card from '../components/Card';
 import { commonStyles } from '../styles/commonStyles';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { groupByMonthYear, sortByDate } from '../utils/utils';
+import Header from '../components/Header';
 
 const Home = () => { 
   const [scheduleData, setScheduleData] = useState([]);
@@ -22,7 +23,7 @@ const Home = () => {
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       const sortedData = sortByDate(data);
-      const groupedData = groupByMonthYear(sortedData);
+      const groupedData = groupByMonthYear(data);
       setScheduleData(groupedData);
 
       setError(null);
@@ -45,6 +46,9 @@ const Home = () => {
 
   return (
     <View style={commonStyles.containerCards}>
+          
+    <Header />
+
       {loading ? (
         <View style={styles.loaderContainer}>
           <ActivityIndicator size="large" color="#007bff" />
@@ -57,6 +61,7 @@ const Home = () => {
           </Pressable>
         </View>
       ) : (
+        
         <SectionList
           sections={scheduleData}
           keyExtractor={(item, index) => item.id?.toString() || index.toString()}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Button, Alert, View, Text } from 'react-native';
+import { ScrollView, Button, Alert, View, Text, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import InputField from '../components/InputField';
 import DatePickerField from '../components/DatePickerField';
@@ -11,6 +11,8 @@ import { formatDate, formatNumberWithDotsInput, removeDots } from '../utils/util
 
 const Form = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
 
   const [formData, setFormData] = useState({
     id: Date.now().toString() + Math.random().toString(36).substring(2, 15),
@@ -21,7 +23,8 @@ const Form = () => {
     pagado: [],
     observacion: '',
     cantidad_personas: '',
-    show: '',
+    show: 'true',
+    descripcion: '',
   });
 
   const eventoItems = [
@@ -37,16 +40,21 @@ const Form = () => {
   };
 
   const handleSubmit = async () => {
+
     if (!formData.fecha || !formData.cliente || !formData.evento) {
       Alert.alert('Error', 'Complente todos los campos obligatorios');
       return;
     }
 
+    setLoading(true);
+
+
       const cleanData = {
-    ...formData,
-    monto_total: removeDots(formData.monto_total),
-    pagado: removeDots(formData.pagado),
-  };
+      ...formData,
+      monto_total: removeDots(formData.monto_total),
+      pagado: removeDots(formData.pagado),
+      creado: new Date().toISOString(), // <-- override to ensure latest timestamp
+    };
 
     try {
       const response = await fetch(GOOGLE_SHEET_URL, {
@@ -57,7 +65,7 @@ const Form = () => {
       const result = await response.json();
 
       if (result.result === 'success') {
-        Alert.alert('Success', 'Data submitted successfully');
+        Alert.alert('Success', 'Evento guardado exitosamente');
         setFormData({
           id:  Date.now().toString() + Math.random().toString(36).substring(2, 15),
           fecha: '',
@@ -67,15 +75,19 @@ const Form = () => {
           pagado: '',
           observacion: '',
           cantidad_personas: '',
-          show: true,
+          show: 'true',
+          creado: '',
+          descripcion: '',
         });
         router.back();
       } else {
-        Alert.alert('Error', 'Submission failed');
+        Alert.alert('Error', 'Error al guardar el evento');
       }
     } catch (error) {
-      Alert.alert('Error', 'An error occurred while submitting the form');
+      Alert.alert('Error', 'Error al enviar los datos');
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,7 +98,8 @@ const Form = () => {
       <DatePickerField
         label="Fecha"
         date={formData.fecha}
-        setDate={(date) => handleChange('fecha', formatDate(date))}
+        locales="es-Es"
+        setDate={(date) => handleChange('fecha', date)}
       />
 
       <InputField
@@ -133,13 +146,28 @@ const Form = () => {
           handleChange('pagado', formattedValue);
         }}      />
 
+        
+      <InputField
+        label="Descripción"
+        placeholder="Detalles breves del evento"
+        value={formData.descripcion}
+        onChangeText={(text) => handleChange('descripcion', text)}
+        numberOfLines={3}
+      />
+
       <View style={{ marginTop: 10 }}>
-        <Button title="Guardar" onPress={handleSubmit} />
+        <Button title={loading ? 'Guardando...' : 'Guardar'} onPress={handleSubmit} disabled={loading} />
       </View>
 
       <View style={{ marginTop: 16 }}>
-        <Button title="Cancelar" color="#888" onPress={() => router.back()} />
+        <Button title="Cancelar" color="#888" disabled={loading} onPress={() => router.back()} />
       </View>
+
+      {loading && (
+      <View style={{ marginVertical: 20 }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )}
     </ScrollView>
   );
 };
