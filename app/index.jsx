@@ -136,8 +136,9 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   sectionHeader: {
-  fontSize: 15,
+  fontSize: 14,
   fontWeight: 'bold',
+  fontStyle: 'italic',
   borderBottomColor: '#ccc',
   borderBottomWidth: 1,
   marginBottom: 10,

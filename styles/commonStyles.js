@@ -9,8 +9,9 @@ export const commonStyles = StyleSheet.create({
   },
    title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
     marginBottom: 20,
+    fontFamily: 'PlayfairDisplayItalic',
   },
 
     containerCards: {
@@ -25,4 +26,9 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 4,
     fontWeight: 'bold',
   },
+   rowBetween: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+   }
 });

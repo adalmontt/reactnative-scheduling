@@ -10,10 +10,31 @@ const Detail = () => {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.overview}>
         <Text style={[commonStyles.title, {color: 'white'}]}>Detalle de Evento</Text>
-        <Text style={styles.label}>Fecha: {formatDate(item.fecha)}</Text>
-        <Text style={styles.label}>Cliente: {item.cliente}</Text>
-        <Text style={styles.label}>Evento: {item.evento}</Text>
-        <Text style={styles.label}>Monto Total: Gs. {formatNumberWithDots(item.monto_total)}</Text>
+        
+          <View style={commonStyles.rowBetween}>
+                <Text style={styles.label}>Fecha:</Text>
+                <Text style={styles.dataWhite}>{formatDate(item.fecha)}</Text>
+          </View>
+
+              <View style={commonStyles.rowBetween}>
+                <Text style={styles.label}>Cliente:</Text>
+                <Text style={styles.dataWhite}>{item.cliente}</Text>
+          </View>
+
+              <View style={commonStyles.rowBetween}>
+                <Text style={styles.label}>Evento:</Text>
+                <Text style={styles.dataWhite}>{item.evento}</Text>
+          </View>
+
+              <View style={commonStyles.rowBetween}>
+                <Text style={styles.label}>Monto Total:</Text>
+                <Text style={styles.dataWhite}>Gs. {formatNumberWithDots(item.monto_total)}</Text>
+          </View>
+
+    </View>
+    <View style={commonStyles.container}>
+      <Text style={styles.secondayTitle}>Detalles Adicionales</Text>
+      <Text>Cantidad de Personas: {item.cantidad_personas}</Text>
     </View>
       <FloatingActionButton icon='pencil' onPress={() => router.push('/form')} />
 
@@ -30,6 +51,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 10,
     color: 'white',
+    borderBottomWidth: 1,
+    borderBottomColor: 'white',
+  },
+    dataWhite: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 10,
+    color: 'white',
+  },
+  secondayTitle: {
+    fontWeight: 'bold',
+    fontSize: 15,
   },
   overview:{
     backgroundColor: '#007bff',
