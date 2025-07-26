@@ -32,10 +32,11 @@ export const commonStyles = StyleSheet.create({
   justifyContent: 'space-between',
   alignItems: 'center',
    },
-      rowBetweenClose: {
+  rowBetweenClose: {
   flexDirection: 'row',
-  gap: 10,
+  gap: 5,
   alignItems: 'center',
+
    },
    toggleText:{
     fontWeight: 'bold',

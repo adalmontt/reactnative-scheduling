@@ -43,6 +43,7 @@ export const formatNumberWithDotsInput = (value) => {
 };
 
 export const removeDots = (value) => {
+  if (typeof value !== 'string') return value;
   return value.replace(/\./g, '');
 };
 
@@ -99,3 +100,16 @@ export const groupByMonthYear = (data, key = 'fecha') => {
     data: groups[title].sort((a, b) => parseDate(a[key]) - parseDate(b[key]))
   }));
 };
+
+
+export function parseExtraServices(str) {
+  const cleanedStr = str
+    .replace(/{|}/g, '') // quitar llaves
+    .split(', ')
+    .reduce((acc, pair) => {
+      const [key, value] = pair.split('=');
+      acc[key] = value === 'true' ? true : false;
+      return acc;
+    }, {});
+  return cleanedStr;
+}

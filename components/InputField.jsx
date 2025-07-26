@@ -13,7 +13,7 @@ const InputField = ({ label, value, onChangeText, placeholder, keyboardType, edi
       {isRequired && <Text style={{ color: 'red' }}> *</Text>}
     </Text>  
 
-      <TextInput
+      {/* <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -21,6 +21,18 @@ const InputField = ({ label, value, onChangeText, placeholder, keyboardType, edi
         keyboardType={keyboardType}
         editable={editable}
         numberOfLines={numberOfLines}
+      /> */}
+
+            <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        style={[styles.input]}
+        keyboardType={keyboardType}
+        editable={editable}
+        numberOfLines={numberOfLines}
+        multiline={numberOfLines > 1}
+        textAlignVertical="top"
       />
     </View>
   );

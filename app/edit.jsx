@@ -24,6 +24,8 @@ const Edit = () => {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const params = useLocalSearchParams();
+  const [formData, setFormData] = useState(null);
+  const [preloaded, setPreloaded] = useState(false);
 
   const showAlert = (title, message) => {
     setAlertTitle(title);
@@ -31,16 +33,42 @@ const Edit = () => {
     setAlertVisible(true);
   };
 
-  const isEditMode = !!params.id; // edit mode if there's an id
+const isEditMode = !!params.item;
+
+console.log("params at top", params.item);
 
 useEffect(() => {
-  if (isEditMode) {
-    setFormData({
-      ...params,
-      extra_services: JSON.parse(params.extra_services || '{}'),
-    });
+  if (params?.item) {
+    try {
+      const parsed = params.item;
+
+      const extraServices = parsed.extra_services
+        ? JSON.parse(parsed.extra_services)
+        : emptyExtraServices;
+
+console.log("parsed", parsed);
+console.log("extraServices", extraServices);
+
+      setFormData({
+        ...parsed,
+        extra_services: extraServices,
+      });
+
+      setPreloaded(true);
+        console.log("entro aca good");
+
+    } catch (err) {
+      console.error('Failed to parse item:', err);
+          Alert.alert("Error", "Error al cargar los datos");
+    setPreloaded(false);
+    }
+  } else {
+    Alert.alert("Error", "Error al cargar los datos");
+    setPreloaded(false);
   }
-}, []);
+}, [params.item]);
+
+
 
   const emptyExtraServices = {
     decoracion: false,
@@ -57,32 +85,6 @@ useEffect(() => {
   };
 
 
-  const createInitialFormData = () => {
-  if (isEditMode) {
-    return {
-      ...params,
-      extra_services: JSON.parse(params.extra_services || '{}'),
-    };
-  }
-
-  return {
-    id: Date.now().toString() + Math.random().toString(36).substring(2, 15),
-    fecha: '',
-    cliente: '',
-    evento: '',
-    monto_total: '',
-    pagado: '',
-    observacion: '',
-    cantidad_personas: '',
-    show: 'true',
-    descripcion: '',
-    creado: '',
-    extra_services: { ...emptyExtraServices },
-  };
-};
-
-
-  const [formData, setFormData] = useState(createInitialFormData());
 
 
   const eventoItems = [
@@ -95,6 +97,8 @@ useEffect(() => {
 
 
   const handleChange = (name, value, isNested = false) => {
+
+    console.log("changing" , formData);
     setFormData(prev => {
       if (isNested) {
         return {
@@ -150,145 +154,140 @@ useEffect(() => {
     }
   };
 
-  return (
+    if(preloaded){
+    return (
 
-    <SafeAreaView style={{ flex: 1 }} edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
-      >
-        <HeaderWithBack title="Editar Evento" />
+      <SafeAreaView style={{ flex: 1 }} edges={['bottom', 'left', 'right']}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
+        >
+          <HeaderWithBack title="Editar Evento" />
 
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={commonStyles.container}>
+          <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={commonStyles.container}>
 
-          <DatePickerField
-            label="Fecha"
-            date={formData.fecha}
-            locales="es-Es"
-            setDate={(date) => handleChange('fecha', date)}
-            isRequired
-          />
+            <DatePickerField
+              label="Fecha"
+              date={formData.fecha}
+              locales="es-Es"
+              setDate={(date) => handleChange('fecha', date)}
+              isRequired
+            />
 
-          <InputField
-            label="Cliente"
-            placeholder="Cliente"
-            value={formData.cliente}
-            onChangeText={(text) => handleChange('cliente', text)}
-            isRequired
-          />
-
-
-          <RadioGroup
-            label="Evento"
-            options={eventoItems}
-            selectedValue={formData.evento}
-            onValueChange={(value) => handleChange('evento', value)}
-            isRequired
-          />
+            <InputField
+              label="Cliente"
+              placeholder="Cliente"
+              value={formData.cliente}
+              onChangeText={(text) => handleChange('cliente', text)}
+              isRequired
+            />
 
 
-          <InputField
-            label="Monto total"
-            placeholder="Monto total"
-            value={formData.monto_total}
-            keyboardType="numeric"
-            onChangeText={(text) => {
-              const formattedValue = formatNumberWithDotsInput(text);
-              handleChange('monto_total', formattedValue);
-            }}
-          />
+            <RadioGroup
+              label="Evento"
+              options={eventoItems}
+              selectedValue={formData.evento}
+              onValueChange={(value) => handleChange('evento', value)}
+              isRequired
+            />
+
+
+            <InputField
+              label="Monto total"
+              placeholder="Monto total"
+              value={formData.monto_total}
+              keyboardType="numeric"
+              onChangeText={(text) => {
+                const formattedValue = formatNumberWithDotsInput(text);
+                handleChange('monto_total', formattedValue);
+              }}
+            />
 
 
 
 
-          <View style={commonStyles.rowBetween}>
-            <View style={{ flex: 2, marginRight: 8 }}>
-              <InputField
-                label="Pago Inicial"
-                placeholder="Pago Inicial"
-                value={formData.pagado}
-                keyboardType="numeric"
-                onChangeText={(text) => {
-                  const formattedValue = formatNumberWithDotsInput(text);
-                  handleChange('pagado', formattedValue);
+            <View style={commonStyles.rowBetween}>
+              <View style={{ flex: 2, marginRight: 8 }}>
+                <InputField
+                  label="Pago Inicial"
+                  placeholder="Pago Inicial"
+                  value={formData.pagado}
+                  keyboardType="numeric"
+                  onChangeText={(text) => {
+                    const formattedValue = formatNumberWithDotsInput(text);
+                    handleChange('pagado', formattedValue);
+                  }} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <InputField
+                  label="# de Personas"
+                  placeholder="Personas"
+                  value={formData.cantidad_personas}
+                  keyboardType="numeric"
+                  onChangeText={(text) => handleChange('cantidad_personas', text.replace(/[^0-9.]/g, ''))}
+                />
+              </View>
+            </View>
+
+
+            <InputField
+              label="Descripción / Observación"
+              placeholder="Detalles breves del evento"
+              value={formData.descripcion}
+              onChangeText={(text) => handleChange('descripcion', text)}
+              numberOfLines={3}
+            />
+
+            <View style={commonStyles.rowBetween}>
+              <Text style={commonStyles.toggleText}>Agregar Servicios adicionales?</Text>
+              <Switch
+                value={showExtraFields}
+                onValueChange={(value) => {
+                  setShowExtraFields(value);
                 }} />
             </View>
-            <View style={{ flex: 1 }}>
-              <InputField
-                label="# de Personas"
-                placeholder="Personas"
-                value={formData.cantidad_personas}
-                keyboardType="numeric"
-                onChangeText={(text) => handleChange('cantidad_personas', text.replace(/[^0-9.]/g, ''))}
-              />
+
+            {showExtraFields && (
+              <View>
+                {Object.entries(formData.extra_services).map(([key, value]) => (
+                  <Checkbox
+                    key={key}
+                    label={key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    value={value}
+                    onValueChange={(val) => handleChange(key, val, true)}
+                  />
+                ))}
+              </View>
+            )}
+
+
+            <View style={{ marginTop: 10 }}>
+              <Button title={loading ? 'Guardando...' : 'Guardar'} onPress={handleSubmit} disabled={loading} />
             </View>
-          </View>
+
+            <View style={{ marginTop: 16 }}>
+              <Button title="Cancelar" color="#888" disabled={loading} onPress={() => router.back()} />
+            </View>
+
+            {loading && (
+              <View style={{ marginVertical: 20 }}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            )}
+          </ScrollView>
 
 
-          <InputField
-            label="Descripción / Observación"
-            placeholder="Detalles breves del evento"
-            value={formData.descripcion}
-            onChangeText={(text) => handleChange('descripcion', text)}
-            numberOfLines={3}
+          <CustomAlert
+            visible={alertVisible}
+            title={alertTitle}
+            message={alertMessage}
+            onClose={() => setAlertVisible(false)}
           />
 
-          <View style={commonStyles.rowBetween}>
-            <Text style={commonStyles.toggleText}>Agregar Servicios adicionales?</Text>
-            <Switch
-              value={showExtraFields}
-              onValueChange={(value) => {
-                setShowExtraFields(value);
-                if (!value) {
-                  setFormData(prev => ({
-                    ...prev,
-                    extra_services: { ...emptyExtraServices }
-                  }));
-                }
-              }} />
-          </View>
-
-          {showExtraFields && (
-            <View>
-              {Object.entries(formData.extra_services).map(([key, value]) => (
-                <Checkbox
-                  key={key}
-                  label={key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  value={value}
-                  onValueChange={(val) => handleChange(key, val, true)}
-                />
-              ))}
-            </View>
-          )}
-
-
-          <View style={{ marginTop: 10 }}>
-            <Button title={loading ? 'Guardando...' : 'Guardar'} onPress={handleSubmit} disabled={loading} />
-          </View>
-
-          <View style={{ marginTop: 16 }}>
-            <Button title="Cancelar" color="#888" disabled={loading} onPress={() => router.back()} />
-          </View>
-
-          {loading && (
-            <View style={{ marginVertical: 20 }}>
-              <ActivityIndicator size="large" color="#0000ff" />
-            </View>
-          )}
-        </ScrollView>
-
-
-        <CustomAlert
-          visible={alertVisible}
-          title={alertTitle}
-          message={alertMessage}
-          onClose={() => setAlertVisible(false)}
-        />
-
-      </KeyboardAvoidingView>
-    </SafeAreaView>
-  );
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  };
 };
-
 export default Edit;
