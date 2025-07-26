@@ -1,7 +1,9 @@
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { Audio } from 'expo-audio'; 
+import { Audio } from 'expo-av'; // fixed import
 import { useEffect } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -23,7 +25,7 @@ export default function Layout() {
           playThroughEarpieceAndroid: false,
         });
       } catch (e) {
-        console.warn("Audio config error", e);
+        console.warn('Audio config error', e);
       }
     };
 
@@ -33,14 +35,21 @@ export default function Layout() {
   }, [fontsLoaded]);
 
   if (!fontsLoaded) {
-    return null;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="form" options={{ headerShown: false }} />
-      <Stack.Screen name="details" options={{ headerShown: false }} />
-    </Stack>
+    <SafeAreaProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="form" options={{ headerShown: false }} />
+        <Stack.Screen name="details" options={{ headerShown: false }} />
+        <Stack.Screen name="edit" options={{ headerShown: false }} />
+      </Stack>
+    </SafeAreaProvider>
   );
 }

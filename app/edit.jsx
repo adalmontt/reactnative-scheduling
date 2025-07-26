@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Button, Alert, View, Text, ActivityIndicator, Switch, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import InputField from '../components/InputField';
@@ -12,22 +12,35 @@ import CustomAlert from '../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderWithBack from '../components/headerWithBack';
 import Checkbox from '../components/Checkbox';
+import { useLocalSearchParams } from 'expo-router';
 
 
-const Form = () => {
+
+const Edit = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [showExtraFields, setShowExtraFields] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
-
+  const params = useLocalSearchParams();
 
   const showAlert = (title, message) => {
     setAlertTitle(title);
     setAlertMessage(message);
     setAlertVisible(true);
   };
+
+  const isEditMode = !!params.id; // edit mode if there's an id
+
+useEffect(() => {
+  if (isEditMode) {
+    setFormData({
+      ...params,
+      extra_services: JSON.parse(params.extra_services || '{}'),
+    });
+  }
+}, []);
 
   const emptyExtraServices = {
     decoracion: false,
@@ -44,7 +57,15 @@ const Form = () => {
   };
 
 
-  const createInitialFormData = () => ({
+  const createInitialFormData = () => {
+  if (isEditMode) {
+    return {
+      ...params,
+      extra_services: JSON.parse(params.extra_services || '{}'),
+    };
+  }
+
+  return {
     id: Date.now().toString() + Math.random().toString(36).substring(2, 15),
     fecha: '',
     cliente: '',
@@ -57,9 +78,8 @@ const Form = () => {
     descripcion: '',
     creado: '',
     extra_services: { ...emptyExtraServices },
-
-  });
-
+  };
+};
 
 
   const [formData, setFormData] = useState(createInitialFormData());
@@ -138,7 +158,7 @@ const Form = () => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
       >
-        <HeaderWithBack title="Agregar Evento" />
+        <HeaderWithBack title="Editar Evento" />
 
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={commonStyles.container}>
 
@@ -271,4 +291,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default Edit;

@@ -1,7 +1,8 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native'
+import { StyleSheet, Text, View, Pressable, Image } from 'react-native'
 import React from 'react'
 import { formatDate, formatNumberWithDots } from '../utils/utils';
 import { useRouter } from 'expo-router';
+import EventBadge from './Badge';
 
 
 const Card = ({item}) => {
@@ -16,12 +17,13 @@ const Card = ({item}) => {
 
   return (
     <Pressable onPress={handlePress}>
+
         <View style={styles.card}>
         <Text style={styles.date}>{formatDate(item.fecha)}</Text>
         <Text style={styles.name}>{item.cliente}</Text>
         <View style={styles.rowBetween}>
-            <Text style={styles.description}>{item.evento}</Text>
-            <Text style={styles.amount}>Gs. {formatNumberWithDots(item.monto_total)}</Text>
+            <EventBadge evento={item.evento} />
+                <Text style={styles.amount}>Gs. {formatNumberWithDots(item.monto_total)}</Text>
           </View>
         </View>
     </Pressable>
@@ -36,6 +38,15 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     backgroundColor: '#f7f7f7',
   },
+  topRightImage: {
+  position: 'absolute',
+  top: 10,
+  right: 10,
+  width: 50,
+  height: 50,
+  borderRadius: 10, // Soft edges
+  zIndex: 5,
+},
   listContent: {
     paddingHorizontal: 16,
     paddingBottom: 20,
@@ -69,7 +80,7 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 16,
-    color: '#007bff',
+    // color: '#007bff',
     fontWeight: 'bold',
     marginTop: 8,
   },

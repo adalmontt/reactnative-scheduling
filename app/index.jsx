@@ -9,6 +9,8 @@ import { commonStyles } from '../styles/commonStyles';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { groupByMonthYear, sortByDate } from '../utils/utils';
 import Header from '../components/Header';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 const Home = () => { 
   const [scheduleData, setScheduleData] = useState([]);
@@ -38,6 +40,12 @@ const Home = () => {
   useEffect(() => {
     fetchSchedule();
   }, []);
+
+  useFocusEffect(
+  useCallback(() => {
+    fetchSchedule();
+  }, [])
+);
 
   const onRefresh = () => {
     setRefreshing(true);

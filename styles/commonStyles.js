@@ -2,11 +2,12 @@ import { StyleSheet } from 'react-native';
 
 export const commonStyles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingTop: 50,
+    flexGrow: 1,
+    paddingTop: 10,
     padding: 20,
-    backgroundColor: '#f7f7f7',
   },
+
+
    title: {
     fontSize: 24,
     // fontWeight: 'bold',
@@ -30,5 +31,16 @@ export const commonStyles = StyleSheet.create({
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
+   },
+      rowBetweenClose: {
+  flexDirection: 'row',
+  gap: 10,
+  alignItems: 'center',
+   },
+   toggleText:{
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+    borderBottomWidth: 1,
    }
 });

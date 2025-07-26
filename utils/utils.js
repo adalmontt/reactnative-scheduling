@@ -1,3 +1,9 @@
+
+  const monthNames = [
+    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+  ];
+
 export const formatNumberWithDots = (number) => {
   return new Intl.NumberFormat('es-ES').format(number);
 };
@@ -15,6 +21,20 @@ export const formatDate = (dateInput) => {
   const year = date.getFullYear();
 
   return `${day}/${month}/${year}`;
+};
+
+export const formatDateDetails = (dateInput) => {
+  const date = new Date(dateInput);
+
+  if (!(date instanceof Date) || isNaN(date.getTime())) {
+    return ''; // return empty string if invalid
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const monthName = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+
+  return `${day} / ${monthName} / ${year}`;
 };
 
 export const formatNumberWithDotsInput = (value) => {
@@ -51,10 +71,7 @@ export const sortByDate = (data, key = 'fecha', direction = 'asc') => {
 
 
 export const groupByMonthYear = (data, key = 'fecha') => {
-  const monthNames = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-  ];
+
 
   const parseDate = (d) => {
     if (typeof d !== 'string') return new Date(d);

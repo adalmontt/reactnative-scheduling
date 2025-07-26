@@ -4,7 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { commonStyles } from '../styles/commonStyles';
 
 
-const DatePickerField = ({ label, date, setDate }) => {
+const DatePickerField = ({ label, date, setDate, isRequired = false }) => {
   const [showPicker, setShowPicker] = useState(false);
 
   const onChange = (event, selectedDate) => {
@@ -16,8 +16,11 @@ const DatePickerField = ({ label, date, setDate }) => {
 
   return (
     <>
-      <Text style={commonStyles.inputLabel}>{label}</Text>
-  
+<Text style={commonStyles.inputLabel}>
+  {label}
+  {isRequired && <Text style={{ color: 'red' }}> *</Text>}
+</Text>  
+
       <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.input}>
         <Text style={{ color: date ? '#000' : '#aaa' }}>{date || `Seleccionar ${label}`}</Text>
       </TouchableOpacity>
