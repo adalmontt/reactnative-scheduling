@@ -33,7 +33,7 @@ const Header = () => {
         <Pressable style={styles.backdrop} onPress={toggleMenu}>
           <View style={styles.menu}>
             <Text style={{ fontFamily: 'PlayfairDisplayItalic', fontSize: 16, marginBottom: 15  }}>Menú</Text>
-            <TouchableOpacity onPress={() => navigate('/about')} style={styles.menuItem}>
+            <TouchableOpacity onPress={() => navigate('/preciosForm')} style={styles.menuItem}>
               <Ionicons name="pricetags-outline" size={20} color="#333" />
               <Text style={styles.menuText}>Precios</Text>
             </TouchableOpacity>

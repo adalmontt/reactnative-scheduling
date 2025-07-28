@@ -19,7 +19,11 @@ export const commonStyles = StyleSheet.create({
     flex: 1,
     paddingTop: 50,
     padding: 10,
-    backgroundColor: '#f7f7f7',
+    backgroundColor: 'white',
+  },
+  SafeAreaViewStyle:{
+    flex: 1,
+    backgroundColor: 'white'
   },
     inputLabel: {
     fontSize: 14,

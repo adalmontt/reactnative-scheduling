@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, Pressable, SectionList } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, Pressable, SectionList, KeyboardAvoidingView, Platform } from 'react-native';
 import { useEffect, useState } from 'react';
 import React from 'react';
 import { useRouter } from 'expo-router';
@@ -11,6 +11,8 @@ import { groupByMonthYear, sortByDate } from '../utils/utils';
 import Header from '../components/Header';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback } from 'react';
+import Footer from '../components/Footer';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const Home = () => { 
   const [scheduleData, setScheduleData] = useState([]);
@@ -53,6 +55,16 @@ const Home = () => {
   };
 
   return (
+
+       <SafeAreaView style={commonStyles.SafeAreaViewStyle} edges={['bottom', 'left', 'right']}>
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
+          >
+
+          
+    
     <View style={commonStyles.containerCards}>
           
     <Header />
@@ -85,9 +97,11 @@ const Home = () => {
 
       )}
 
-      <FloatingActionButton onPress={() => router.push('/form')} />
-
+      {/* <FloatingActionButton onPress={() => router.push('/form')} /> */}
+      <Footer/>
     </View>
+        </KeyboardAvoidingView>
+        </SafeAreaView>
   );
 };
 

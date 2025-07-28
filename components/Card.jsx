@@ -3,7 +3,7 @@ import React from 'react'
 import { formatDate, formatNumberWithDots } from '../utils/utils';
 import { useRouter } from 'expo-router';
 import EventBadge from './Badge';
-
+import Colors from '../constants/colors';
 
 const Card = ({item}) => {
     const router = useRouter();
@@ -33,34 +33,23 @@ const Card = ({item}) => {
 export default Card
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 50,
-    backgroundColor: '#f7f7f7',
-  },
-  topRightImage: {
-  position: 'absolute',
-  top: 10,
-  right: 10,
-  width: 50,
-  height: 50,
-  borderRadius: 10, // Soft edges
-  zIndex: 5,
-},
-  listContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-  },
+
   card: {
-    backgroundColor: '#fff',
-    padding: 16,
-    marginBottom: 12,
-    borderRadius: 10,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+  backgroundColor: Colors.offWhite,
+  padding: 16,
+  marginBottom: 12,
+  borderRadius: 10,
+
+ 
+  borderWidth: 1,
+  borderColor: '#e0e0e0', 
+
+
+  elevation: 1, // Android
+  shadowColor: '#000', // iOS
+  shadowOpacity: 0.05,
+  shadowOffset: { width: 0, height: 1 },
+  shadowRadius: 2,
   },
   rowBetween: {
   flexDirection: 'row',

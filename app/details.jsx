@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Switch, Button, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Switch, Button, TextInput, TouchableWithoutFeedback, Keyboard, FlatList } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { formatDate, formatDateDetails, formatNumberWithDots, parseExtraServices } from '../utils/utils';
 import { commonStyles } from '../styles/commonStyles';
@@ -11,6 +11,8 @@ import HeaderWithBack from '../components/headerWithBack';
 import { SERVICE_LABELS } from '../constants/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EditableField from '../components/EditableField';
+import Footer from '../components/Footer';
+import ScreenLayout from '../components/ScreenLayout';
 
 
 
@@ -36,7 +38,7 @@ const Detail = () => {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const response = await fetch(`${GOOGLE_SHEET_URL}?id=${id}`);
+        const response = await fetch(`${GOOGLE_SHEET_URL}&id=${id}`);
         const result = await response.json();
         setItem(result);
         setDescripcion(result.descripcion);
@@ -172,157 +174,154 @@ const Detail = () => {
   else if (item) {
     return (
 
-      <SafeAreaView style={{ flex: 1 }} edges={['bottom', 'left', 'right']}>
+      <ScreenLayout
+        footer = 'false'
+      >
 
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
+        <HeaderWithBack
+          title="Detalle de Evento"
+          sideIcon="trash-outline"
+          sideFunction={() => setShowDeleteModal(true)}
+          sideTitle="Eliminar Evento"
+          sideColor='red'
+        />
+        <ScrollView
+          contentContainerStyle={[commonStyles.container, { paddingBottom: 100 }]} // add padding bottom
+          keyboardShouldPersistTaps="handled"
         >
 
-          <HeaderWithBack
-            title="Detalle de Evento"
-          />
-          <ScrollView
-            contentContainerStyle={[commonStyles.container, { paddingBottom: 40 }]} // add padding bottom
-            keyboardShouldPersistTaps="handled"
-          >
-
-            <View style={styles.overview}>
+          <View style={styles.overview}>
 
 
-              <View style={commonStyles.rowBetween}>
-                <Text style={styles.label}>Fecha:</Text>
-                <Text style={styles.dataWhite}>{formatDateDetails(item.fecha)}</Text>
-              </View>
-
-              <View style={commonStyles.rowBetween}>
-                <Text style={styles.label}>Cliente:</Text>
-                <Text style={styles.dataWhite}>{item.cliente}</Text>
-              </View>
-
-              <View style={commonStyles.rowBetween}>
-                <Text style={styles.label}>Evento:</Text>
-                <Text style={styles.dataWhite}>{item.evento}</Text>
-              </View>
-
-              <EditableField
-                label="Monto total:"
-                value={montoTotal}
-                onChange={setMontoTotal}
-                keyboardType="numeric"
-                textStyle={styles.dataWhite}
-                labelStyle={styles.label}
-                prefix="Gs. "
-                formatWithDots={true}
-
-              />
-
-              <EditableField
-                label="Cantidad de personas:"
-                value={cantidadPersonas}
-                onChange={setCantidadPersonas}
-                keyboardType="numeric"
-                textStyle={styles.dataWhite}
-                labelStyle={styles.label}
-              />
-
-              <EditableField
-                label="Pagado:"
-                value={pagado}
-                onChange={setPagado}
-                keyboardType="numeric"
-                textStyle={styles.dataWhite}
-                labelStyle={styles.label}
-                prefix="Gs. "
-                formatWithDots={true}
-
-              />
-
-
+            <View style={commonStyles.rowBetween}>
+              <Text style={styles.label}>Fecha:</Text>
+              <Text style={styles.dataWhite}>{formatDateDetails(item.fecha)}</Text>
             </View>
 
+            <View style={commonStyles.rowBetween}>
+              <Text style={styles.label}>Cliente:</Text>
+              <Text style={styles.dataWhite}>{item.cliente}</Text>
+            </View>
 
-            <View style={{ marginTop: 30 }}>
+            <View style={commonStyles.rowBetween}>
+              <Text style={styles.label}>Evento:</Text>
+              <Text style={styles.dataWhite}>{item.evento}</Text>
+            </View>
 
-              <Text style={styles.secondayTitle}>Descripcion o comentarios</Text>
+            <EditableField
+              label="Monto total:"
+              value={montoTotal}
+              onChange={setMontoTotal}
+              keyboardType="numeric"
+              textStyle={styles.dataWhite}
+              labelStyle={styles.label}
+              prefix="Gs. "
+              formatWithDots={true}
+            />
 
-             {isEditingDesc ? (
-  <TextInput
-    style={[styles.descripcion, styles.descripcionInput]}
-    value={descripcion}
-    onChangeText={setDescripcion}
-    onBlur={() => setIsEditingDesc(false)} // Auto-exit on blur
-    multiline
-    numberOfLines={3}
-    textAlignVertical="top"
-    autoFocus
-  />
-) : (
-  <Text
-    style={styles.descripcion}
-    onPress={() => setIsEditingDesc(true)}
-  >
-    {descripcion.trim() !== '' ? descripcion : 'Sin descripción (tocar para editar)'}
-  </Text>
-)}
+            <EditableField
+              label="Cantidad de personas:"
+              value={cantidadPersonas}
+              onChange={setCantidadPersonas}
+              keyboardType="numeric"
+              textStyle={styles.dataWhite}
+              labelStyle={styles.label}
+            />
+
+            <EditableField
+              label="Pagado:"
+              value={pagado}
+              onChange={setPagado}
+              keyboardType="numeric"
+              textStyle={styles.dataWhite}
+              labelStyle={styles.label}
+              prefix="Gs. "
+              formatWithDots={true}
+
+            />
 
 
-              <Text style={styles.secondayTitle}>Servicios Adicionaless</Text>
+          </View>
 
-              {orderedKeys.map(key => (
-                <View key={key} style={commonStyles.rowBetweenClose}>
+
+          <View style={{ marginTop: 30 }}>
+
+            <Text style={styles.secondayTitle}>Descripcion o comentarios</Text>
+
+            {isEditingDesc ? (
+              <TextInput
+                style={[styles.descripcion, styles.descripcionInput]}
+                value={descripcion}
+                onChangeText={setDescripcion}
+                onBlur={() => setIsEditingDesc(false)} // Auto-exit on blur
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                autoFocus
+              />
+            ) : (
+              <Text
+                style={styles.descripcion}
+                onPress={() => setIsEditingDesc(true)}
+              >
+                {descripcion.trim() !== '' ? descripcion : 'Sin descripción (tocar para editar)'}
+              </Text>
+            )}
+
+
+            <Text style={styles.secondayTitle}>Servicios Adicionaless</Text>
+
+            <FlatList
+              data={orderedKeys}
+              keyExtractor={key => key}
+              renderItem={({ item: key }) => (
+                <View style={commonStyles.rowBetweenClose}>
                   <Text style={styles.labelAdditional}>
                     {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </Text>
                   <Switch
                     value={servicesState[key] || false}
                     onValueChange={() => handleToggleService(key)}
-
                   />
                 </View>
-              ))}
-              <View style={{ marginTop: 20, alignItems: 'center' }}>
-                <Button
-                  title="Actualizar"
-                  onPress={handleEdit}
-                  color="#007bff"
-                />
-              </View>
-
+              )}
+              scrollEnabled={false}
+            />
+            <View style={{ marginTop: 20, alignItems: 'center' }}>
+              <Button
+                title="Actualizar"
+                onPress={handleEdit}
+                color="#007bff"
+              />
             </View>
 
+          </View>
 
-            <ModalConfirm
-              visible={showDeleteModal}
-              message="¿Estás seguro que deseas eliminar este evento?"
-              onCancel={() => setShowDeleteModal(false)}
-              onConfirm={handleDelete}
-            />
-            <CustomAlert
-              visible={alertVisible}
-              title={alertTitle}
-              message={alertMessage}
-              onClose={() => setAlertVisible(false)}
-            />
-            {isHiding && (
-              <View style={styles.spinnerOverlay}>
-                <ActivityIndicator size="large" color="#007bff" />
-              </View>
-            )}
 
-          </ScrollView>
-
-          <FloatingActionButton
-            icon="grid"
-            actions={[
-              { icon: 'trash', color: 'red', onPress: () => setShowDeleteModal(true) },
-            ]}
+          <ModalConfirm
+            visible={showDeleteModal}
+            message="¿Estás seguro que deseas eliminar este evento?"
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDelete}
           />
-        </KeyboardAvoidingView>
+          <CustomAlert
+            visible={alertVisible}
+            title={alertTitle}
+            message={alertMessage}
+            onClose={() => setAlertVisible(false)}
+          />
+          {isHiding && (
+            <View style={styles.spinnerOverlay}>
+              <ActivityIndicator size="large" color="#007bff" />
+            </View>
+          )}
 
-      </SafeAreaView>
+        </ScrollView>
 
+
+
+
+      </ScreenLayout>
 
     );
   }

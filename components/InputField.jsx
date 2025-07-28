@@ -1,29 +1,26 @@
-
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { commonStyles } from '../styles/commonStyles';
 
+const InputField = React.memo((props) => {
+  const {
+    label,
+    value,
+    onChangeText,
+    placeholder,
+    keyboardType,
+    editable = true,
+    numberOfLines = 1,
+    isRequired = false,
+  } = props;
 
-const InputField = ({ label, value, onChangeText, placeholder, keyboardType, editable = true, numberOfLines = 1, isRequired = false }) => {
   return (
     <View style={styles.container}>
-      
-    <Text style={commonStyles.inputLabel}>
-      {label}
-      {isRequired && <Text style={{ color: 'red' }}> *</Text>}
-    </Text>  
-
-      {/* <TextInput
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        style={styles.input}
-        keyboardType={keyboardType}
-        editable={editable}
-        numberOfLines={numberOfLines}
-      /> */}
-
-            <TextInput
+      <Text style={commonStyles.inputLabel}>
+        {label}
+        {isRequired && <Text style={{ color: 'red' }}> *</Text>}
+      </Text>
+      <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -36,7 +33,7 @@ const InputField = ({ label, value, onChangeText, placeholder, keyboardType, edi
       />
     </View>
   );
-};
+});
 
 export default InputField;
 

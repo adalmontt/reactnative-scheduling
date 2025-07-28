@@ -18,6 +18,7 @@ formatWithDots = false,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
 
+
   const handleChangeText = (text) => {
     const raw = removeDots(text.replace(prefix, '').trim());
     const formatted = formatWithDots ? formatNumberWithDots(raw) : raw;
@@ -40,7 +41,7 @@ formatWithDots = false,
           placeholder={placeholder}
         />
       ) : (
-        <Pressable onPress={() => setIsEditing(true)} style={{ flex: 1 }}>
+        <Pressable onPress={() => setIsEditing(true)} style={{}}>
           <Text style={[styles.text, textStyle]}>
             {value && value !== ''
                 ? `${prefix}${formatWithDots ? formatNumberWithDots(removeDots(value)) : value}`
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     
   },
   input: {
-    flex: 2,
+   
     color: "white",
     borderColor: '#ccc',
     textAlign: 'right',

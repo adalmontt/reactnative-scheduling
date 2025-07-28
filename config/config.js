@@ -1,1 +1,2 @@
-export const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbz6Lwg4kmcgoKX9Lx0tsExiV_2oyQ1BV04ETLetOquSTQiZshx9Vh3SFoZO4PgEypWH/exec';
+export const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwtLLXwsjFxt3QyYLGnlZjgXNd2PM_2I3ZFHiAZCr2x9Lvs5B0d-yQ7AwKgrqoXpypx/exec?sheet=APP';
+export const GOOGLE_SHEET_PRECIOS_URL = 'https://script.google.com/macros/s/AKfycbwtLLXwsjFxt3QyYLGnlZjgXNd2PM_2I3ZFHiAZCr2x9Lvs5B0d-yQ7AwKgrqoXpypx/exec?sheet=PRECIOS';
