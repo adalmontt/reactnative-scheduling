@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Switch, Button, TextInput, TouchableWithoutFeedback, Keyboard, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Switch, Button, TextInput, TouchableWithoutFeedback, Keyboard, FlatList, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { formatDate, formatDateDetails, formatNumberWithDots, parseExtraServices } from '../utils/utils';
+import { formatDate, formatDateDetails, formatNumberWithDots, parseExtraServices, removeDots } from '../utils/utils';
 import { commonStyles } from '../styles/commonStyles';
 import FloatingActionButton from '../components/FloatingActionButton';
 import { useEffect, useState } from 'react';
@@ -13,6 +13,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import EditableField from '../components/EditableField';
 import Footer from '../components/Footer';
 import ScreenLayout from '../components/ScreenLayout';
+import IconButton from '../components/IconButton';
+import { generateAndSharePDF } from '../utils/generatePDF';
+import SharePDFButton from '../components/SharePDFButton';
+import { Ionicons } from '@expo/vector-icons';
+import Checkbox from '../components/Checkbox';
 
 
 
@@ -26,6 +31,8 @@ const Detail = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [isHiding, setIsHiding] = useState(false);
   const [servicesState, setServicesState] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+
   // Editable fields
   const [descripcion, setDescripcion] = useState('');
   const [isEditingDesc, setIsEditingDesc] = useState(false);
@@ -33,6 +40,7 @@ const Detail = () => {
   const [pagado, setPagado] = useState('');
   const [montoTotal, setMontoTotal] = useState('');
 
+  
 
   // Carga los datos
   useEffect(() => {
@@ -69,6 +77,7 @@ const Detail = () => {
   const handleDelete = async () => {
     setShowDeleteModal(false);
     setIsHiding(true);
+    setIsEditing(true);
     const body = {
       id: item.id,
       show: 'false',
@@ -84,6 +93,7 @@ const Detail = () => {
 
       if (result.result === 'updated') {
         showAlert('Evento Eliminado', 'Evento eliminado correctamente.');
+        setIsEditing(false);
         router.back();
       } else {
         showAlert('Error', 'No se pudo ocultar el evento.');
@@ -99,17 +109,42 @@ const Detail = () => {
   // Parsea extra services
   useEffect(() => {
     if (item?.extra_services) {
-      const extraServicesString = item.extra_services || '{}';
-      const parsed = Object.fromEntries(
-        extraServicesString
-          .replace(/{|}/g, '')
-          .split(', ')
-          .map(pair => {
-            const [key, value] = pair.split('=');
-            return [key, value === 'true'];
-          })
+      // item.extra_services may come as an object or string, handle both cases:
+      let parsedServices = {};
+
+      if (typeof item.extra_services === 'string') {
+        // Try to parse JSON string (sometimes backend sends stringified JSON)
+        try {
+          parsedServices = JSON.parse(item.extra_services);
+        } catch {
+          // fallback to old parser for `{key=value,...}` format
+          parsedServices = Object.fromEntries(
+            item.extra_services
+              .replace(/{|}/g, '')
+              .split(', ')
+              .map(pair => {
+                const [key, value] = pair.split('=');
+                return [key, Number(value) || 0];
+              })
+          );
+        }
+      } else {
+        // Already an object
+        parsedServices = item.extra_services;
+      }
+
+      // Convert to structure: { key: { selected: boolean, quantity: number } }
+      const servicesStateWithSelection = Object.fromEntries(
+        Object.entries(parsedServices).map(([key, quantity]) => [
+          key,
+          {
+            selected: quantity > 0,
+            quantity: quantity,
+          },
+        ])
       );
-      setServicesState(parsed);
+
+      setServicesState(servicesStateWithSelection);
     }
   }, [item]);
 
@@ -121,19 +156,33 @@ const Detail = () => {
 
   // Post edit
   const handleEdit = async () => {
+    if (isEditing) return; // prevent double click
+
+    setIsEditing(true);
     try {
+      const cleanedExtraServices = Object.entries(servicesState)
+        .filter(([_, val]) => val.selected && val.quantity > 0)
+        .reduce((acc, [key, val]) => {
+          acc[key] = val.quantity;
+          return acc;
+        }, {});
+
+      const body = {
+        id: item.id,
+        extra_services: cleanedExtraServices,
+        descripcion,
+        cantidad_personas: cantidadPersonas,
+        pagado: removeDots(pagado),
+        monto_total: removeDots(montoTotal),
+      };
+
+
       const response = await fetch(GOOGLE_SHEET_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: item.id,
-          extra_services: servicesState,
-          descripcion: descripcion,
-
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       });
+
 
       const result = await response.json();
       if (result.result === 'updated') {
@@ -144,6 +193,8 @@ const Detail = () => {
     } catch (err) {
       console.error('Error al enviar extra services:', err);
       showAlert('Error', 'Fallo la actualización.');
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -160,6 +211,7 @@ const Detail = () => {
     'chop_50',
     'tragos_50',
     'tragos_100',
+    'mozos'
   ];
 
 
@@ -175,7 +227,8 @@ const Detail = () => {
     return (
 
       <ScreenLayout
-        footer = 'false'
+        footer='false'
+        isSpinner={isEditing}
       >
 
         <HeaderWithBack
@@ -243,6 +296,24 @@ const Detail = () => {
 
           </View>
 
+          <View style={{ marginTop: 30, marginLeft: 20 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Compartir PDF</Text>
+
+            <View style={{ marginTop: 10 }}>
+              <SharePDFButton
+                data={{
+                  cliente: item.cliente,
+                  evento: item.evento,
+                  fecha: item.fecha,
+                  cantidad_personas: cantidadPersonas,
+                  descripcion: descripcion,
+                  extra_services: item.extra_services,
+                  monto_total: montoTotal,
+                  pagado: pagado,
+                }}
+              />
+            </View>
+          </View>
 
           <View style={{ marginTop: 30 }}>
 
@@ -271,31 +342,153 @@ const Detail = () => {
 
             <Text style={styles.secondayTitle}>Servicios Adicionaless</Text>
 
-            <FlatList
+            {/* <FlatList
               data={orderedKeys}
-              keyExtractor={key => key}
-              renderItem={({ item: key }) => (
-                <View style={commonStyles.rowBetweenClose}>
-                  <Text style={styles.labelAdditional}>
-                    {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                  </Text>
-                  <Switch
-                    value={servicesState[key] || false}
-                    onValueChange={() => handleToggleService(key)}
+              keyExtractor={(key) => key}
+              scrollEnabled={false}
+              renderItem={({ item: key }) => {
+                const service = servicesState[key] || { selected: false, quantity: 0 };
+                return (
+                  <View style={commonStyles.rowBetweenClose}>
+                    <Text style={styles.labelAdditional}>
+                      {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </Text>
+                    <Switch
+                      value={service.selected}
+                      onValueChange={() => {
+                        setServicesState(prev => ({
+                          ...prev,
+                          [key]: {
+                            selected: !service.selected,
+                            quantity: service.quantity
+                          },
+                        }));
+                      }}
+                    />
+                    {service.selected && (
+                      <TextInput
+                        style={{
+                          width: 60,
+                          borderWidth: 1,
+                          borderColor: '#ccc',
+                          borderRadius: 4,
+                          paddingHorizontal: 8,
+                          paddingVertical: 4,
+                          marginLeft: 10,
+                          textAlign: 'center',
+                        }}
+                        keyboardType="numeric"
+                        value={String(service.quantity)}
+                        onChangeText={(val) => {
+                          const qty = val.replace(/[^0-9]/g, '');
+                          setServicesState(prev => ({
+                            ...prev,
+                            [key]: {
+                              selected: service.selected,
+                              quantity: Number(qty) || 0,
+                            },
+                          }));
+                        }}
+                      />
+                    )}
+                  </View>
+                );
+              }}
+            /> */}
+
+
+            <View style={{ marginTop: 10 }}>
+              {/* Header */}
+              <View style={[styles.tableRow, { marginBottom: 10 }]}>
+                <Text style={[styles.tableHeader, { flex: 1 }]}>✔</Text>
+                <Text style={[styles.tableHeader, { flex: 3 }]}>Servicio</Text>
+                <Text style={[styles.tableHeader, { flex: 2 }]}>Cantidad</Text>
+              </View>
+
+              {orderedKeys.map((key) => {
+                const service = servicesState[key] || { selected: false, quantity: 0 };
+                const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+                return (
+                  <View
+                    key={key}
+                    style={[
+                      styles.tableRow,
+                      {
+                        backgroundColor: service.selected ? '#ADD8E6' : 'white',
+                        alignItems: 'center',
+                        paddingVertical: 8,
+                        paddingHorizontal: 10,
+                        borderRadius: 6,
+                        marginBottom: 8,
+                      },
+                    ]}
+                  >
+                <View style={{ flex: 1, justifyContent: 'center' }}>
+                  <Checkbox
+                    value={service.selected}
+                    onValueChange={(val) => {
+                      setServicesState(prev => ({
+                        ...prev,
+                        [key]: {
+                          ...service,
+                          selected: val,
+                        },
+                      }));
+                    }}
                   />
                 </View>
-              )}
-              scrollEnabled={false}
-            />
+
+                    <Text style={[styles.tableCell, { flex: 3 }]}>{label}</Text>
+
+                    <View style={{ flex: 2, justifyContent: 'center' }}>
+                      <TextInput
+                        placeholder="0"
+                        keyboardType="numeric"
+                        editable={service.selected}
+                        style={{
+                          opacity: service.selected ? 1 : 0.4,
+                          height: 40,
+                          borderWidth: 1,
+                          borderColor: '#ccc',
+                          borderRadius: 5,
+                          paddingHorizontal: 10,
+                          backgroundColor: service.selected ? '#fff' : '#eee',
+                          textAlign: 'center',
+                        }}
+                        value={String(service.quantity || '')}
+                        onChangeText={(val) => {
+                          const qty = val.replace(/[^0-9]/g, '');
+                          setServicesState(prev => ({
+                            ...prev,
+                            [key]: {
+                              ...service,
+                              quantity: Number(qty) || 0,
+                            },
+                          }));
+                        }}
+                      />
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+
+
             <View style={{ marginTop: 20, alignItems: 'center' }}>
-              <Button
+              <IconButton
                 title="Actualizar"
+                iconName="refresh"
                 onPress={handleEdit}
-                color="#007bff"
+                backgroundColor="#007bff"
+                iconColor="#fff"
+                loading={false}
+                disabled={isEditing}
               />
             </View>
 
           </View>
+
 
 
           <ModalConfirm
@@ -310,15 +503,10 @@ const Detail = () => {
             message={alertMessage}
             onClose={() => setAlertVisible(false)}
           />
-          {isHiding && (
-            <View style={styles.spinnerOverlay}>
-              <ActivityIndicator size="large" color="#007bff" />
-            </View>
-          )}
+
+
 
         </ScrollView>
-
-
 
 
       </ScreenLayout>
@@ -329,6 +517,7 @@ const Detail = () => {
 
 
 const styles = StyleSheet.create({
+
   descripcion: {
     fontSize: 16,
     marginBottom: 15,
@@ -402,7 +591,21 @@ const styles = StyleSheet.create({
   descripcionInput: {
     backgroundColor: '#f9f9f9',
     minHeight: 60,
-  }
+  },
+    tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+  },
+  tableHeader: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#555',
+  },
+  tableCell: {
+    fontSize: 14,
+    color: '#333',
+  },
 
 
 });

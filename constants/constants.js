@@ -11,3 +11,12 @@ export const SERVICE_LABELS = {
   extra_entrada: 'Entrada',
   extra_bocaditos_dulces: 'Bocaditos Dulces',
 };
+
+
+export const categorias = [
+        { label: 'Quinta', value: 'quinta' },
+        { label: 'Comida', value: 'comida' },
+        { label: 'Bebida', value: 'bebida' },
+        { label: 'Decoracion', value: 'decoracion' },
+        { label: 'Miscelaneo', value: 'misc' },
+    ];

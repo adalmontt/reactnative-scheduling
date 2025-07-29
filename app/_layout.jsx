@@ -50,6 +50,8 @@ export default function Layout() {
         <Stack.Screen name="details" options={{ headerShown: false }} />
         <Stack.Screen name="edit" options={{ headerShown: false }} />
         <Stack.Screen name="precios" options={{ headerShown: false }} />
+        <Stack.Screen name="preciosForm" options={{ headerShown: false }} />
+        <Stack.Screen name="comboForm" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
   );

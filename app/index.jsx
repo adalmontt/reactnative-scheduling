@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, FlatList, ActivityIndicator, Pressable, Section
 import { useEffect, useState } from 'react';
 import React from 'react';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; 
-import { GOOGLE_SHEET_URL } from '../config/config';  
+import { Ionicons } from '@expo/vector-icons';
+import { GOOGLE_SHEET_URL } from '../config/config';
 import Card from '../components/Card';
 import { commonStyles } from '../styles/commonStyles';
 import FloatingActionButton from '../components/FloatingActionButton';
@@ -14,7 +14,7 @@ import { useCallback } from 'react';
 import Footer from '../components/Footer';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const Home = () => { 
+const Home = () => {
   const [scheduleData, setScheduleData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,10 +44,10 @@ const Home = () => {
   }, []);
 
   useFocusEffect(
-  useCallback(() => {
-    fetchSchedule();
-  }, [])
-);
+    useCallback(() => {
+      fetchSchedule();
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -56,52 +56,52 @@ const Home = () => {
 
   return (
 
-       <SafeAreaView style={commonStyles.SafeAreaViewStyle} edges={['bottom', 'left', 'right']}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
-          >
+    <SafeAreaView style={commonStyles.SafeAreaViewStyle} edges={['bottom', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
+      >
 
-          
-    
-    <View style={commonStyles.containerCards}>
-          
-    <Header />
 
-      {loading ? (
-        <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#007bff" />
-        </View>
-      ) : error ? (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {error}</Text>
-          <Pressable onPress={fetchSchedule} style={styles.retryButton}>
-            <Text style={styles.retryText}>Intentalo de nuevo</Text>
-          </Pressable>
-        </View>
-      ) : (
-        
-        <SectionList
-          sections={scheduleData}
-          keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-          renderItem={({ item }) => <Card item={item} />}
-          renderSectionHeader={({ section: { title } }) => (
-            <Text style={styles.sectionHeader}>{title}</Text>
+
+        <View style={commonStyles.containerCards}>
+
+          <Header />
+
+          {loading ? (
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator size="large" color="#007bff" />
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>Error: {error}</Text>
+              <Pressable onPress={fetchSchedule} style={styles.retryButton}>
+                <Text style={styles.retryText}>Intentalo de nuevo</Text>
+              </Pressable>
+            </View>
+          ) : (
+
+            <SectionList
+              sections={scheduleData}
+              keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+              renderItem={({ item }) => <Card item={item} />}
+              renderSectionHeader={({ section: { title } }) => (
+                <Text style={styles.sectionHeader}>{title}</Text>
+              )}
+              contentContainerStyle={styles.listContent}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              showsVerticalScrollIndicator={false}
+            />
+
           )}
-          contentContainerStyle={styles.listContent}
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          showsVerticalScrollIndicator={false}
-        />
-
-      )}
 
       {/* <FloatingActionButton onPress={() => router.push('/form')} /> */}
       <Footer/>
-    </View>
-        </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -158,15 +158,15 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   sectionHeader: {
-  fontSize: 14,
-  fontWeight: 'bold',
-  fontStyle: 'italic',
-  borderBottomColor: '#ccc',
-  borderBottomWidth: 1,
-  marginBottom: 10,
-  paddingVertical: 6,
-  paddingHorizontal: 14,
-  marginTop: 10,
-  borderRadius: 6,
-},
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    marginBottom: 10,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    marginTop: 10,
+    borderRadius: 6,
+  },
 });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Button, Alert, View, Text, ActivityIndicator, Switch, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { ScrollView, Button, Alert, View, Text, ActivityIndicator, Switch, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, StyleSheet, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import InputField from '../components/InputField';
 import DatePickerField from '../components/DatePickerField';
@@ -16,6 +16,7 @@ import Footer from '../components/Footer';
 import ModalConfirm from '../components/ModalConfirm';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenLayout from '../components/ScreenLayout';
+import Colors from '../constants/colors';
 
 
 const Form = () => {
@@ -27,6 +28,7 @@ const Form = () => {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [servicesList, setServicesList] = useState([]);
 
 
   const showAlert = (title, message) => {
@@ -36,18 +38,18 @@ const Form = () => {
   };
 
   const emptyExtraServices = {
-    decoracion: false,
-    buffet: false,
-    asado: false,
-    hamburguesa: false,
-    lomito: false,
-    chop_50: false,
-    chop_30: false,
-    tragos_50: false,
-    tragos_100: false,
-    entrada: false,
-    bocaditos_dulces: false,
-
+    decoracion: { selected: false, quantity: 1 },
+    buffet: { selected: false, quantity: 1 },
+    asado: { selected: false, quantity: 1 },
+    hamburguesa: { selected: false, quantity: 1 },
+    lomito: { selected: false, quantity: 1 },
+    chop_50: { selected: false, quantity: 1 },
+    chop_30: { selected: false, quantity: 1 },
+    tragos_50: { selected: false, quantity: 1 },
+    tragos_100: { selected: false, quantity: 1 },
+    entrada: { selected: false, quantity: 1 },
+    bocaditos_dulces: { selected: false, quantity: 1 },
+    mozos: { selected: false, quantity: 1 },
   };
 
 
@@ -67,6 +69,13 @@ const Form = () => {
 
   });
 
+  const handleToggleExtraServices = (value) => {
+    setShowExtraFields(value);
+    setFormData(prev => ({
+      ...prev,
+      extra_services: value ? prev.extra_services : { ...emptyExtraServices }
+    }));
+  };
 
 
   const [formData, setFormData] = useState(createInitialFormData());
@@ -81,20 +90,25 @@ const Form = () => {
   ];
 
 
-  const handleChange = (name, value, isNested = false) => {
+  const handleChange = (name, value, isNested = false, field = 'selected') => {
     setFormData(prev => {
       if (isNested) {
         return {
           ...prev,
           extra_services: {
             ...prev.extra_services,
-            [name]: value,
-          },
+            [name]: {
+              ...prev.extra_services[name],
+              [field]: value
+            }
+          }
         };
       }
       return { ...prev, [name]: value };
     });
   };
+
+
 
   const handleSubmit = async () => {
 
@@ -104,14 +118,25 @@ const Form = () => {
       return;
     }
 
+
+    setShowSaveModal(false);
     setLoading(true);
+
+
+    const cleanedExtraServices = Object.entries(formData.extra_services)
+      .filter(([_, val]) => val.selected)
+      .reduce((acc, [key, val]) => {
+        acc[key] = val.quantity;
+        return acc;
+      }, {});
 
 
     const cleanData = {
       ...formData,
+      extra_services: cleanedExtraServices,
       monto_total: removeDots(formData.monto_total),
       pagado: removeDots(formData.pagado),
-      creado: new Date().toISOString(), // <-- override to ensure latest timestamp
+      creado: new Date().toISOString(),
     };
 
     try {
@@ -139,7 +164,8 @@ const Form = () => {
   };
 
   return (
-    <ScreenLayout>
+    <ScreenLayout
+      isSpinner={loading}>
 
       <HeaderWithBack
         title="Agregar Evento"
@@ -223,45 +249,73 @@ const Form = () => {
         />
 
         <View style={commonStyles.rowBetween}>
-          <Text style={commonStyles.toggleText}>Agregar Servicios adicionales?</Text>
+          <Text style={commonStyles.toggleText}>¿Agregar servicios adicionales?</Text>
           <Switch
             value={showExtraFields}
-            onValueChange={(value) => {
-              setShowExtraFields(value);
-              if (!value) {
-                setFormData(prev => ({
-                  ...prev,
-                  extra_services: { ...emptyExtraServices }
-                }));
-              }
-            }} />
+            onValueChange={handleToggleExtraServices}
+          />
         </View>
 
-        {showExtraFields && (
-          <View>
-            {Object.entries(formData.extra_services).map(([key, value]) => (
-              <Checkbox
-                key={key}
-                label={key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                value={value}
-                onValueChange={(val) => handleChange(key, val, true)}
-              />
-            ))}
+        {showExtraFields && formData?.extra_services && (
+          <View style={{ marginTop: 10 }}>
+            {/* Header */}
+            <View style={[styles.tableRow, { marginBottom: 10 }]}>
+              <Text style={[styles.tableHeader, { flex: 1 }]}>✔</Text>
+              <Text style={[styles.tableHeader, { flex: 3 }]}>Servicio</Text>
+              <Text style={[styles.tableHeader, { flex: 2 }]}>Cantidad</Text>
+            </View>
+
+            {Object.entries(formData.extra_services).map(([key, service]) => {
+              const label =
+                typeof key === 'string'
+                  ? key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
+                  : 'Servicio';
+
+              return (
+                <View key={key} style={[styles.tableRow,
+                {
+                  backgroundColor: service.selected ? Colors.lightBlue : 'white', // soft green / soft red
+                  justifyContent: 'center', alignItems: 'center', padding: 10,
+                },
+                ]}>
+                  <View style={{ flex: 1, justifyContent: 'center', }}>
+                    <Checkbox
+                      value={service.selected}
+                      onValueChange={(val) => handleChange(key, val, true, 'selected')}
+                    />
+                  </View>
+
+                  <Text style={[styles.tableCell, { flex: 3 }]}>{label}</Text>
+
+                  <View style={{ flex: 2, justifyContent: 'center' }}>
+                    <TextInput
+                      placeholder="0"
+                      keyboardType="numeric"
+                      editable={service.selected}
+                      style={{
+                        opacity: service.selected ? 1 : 0.3,
+                        height: 40,
+                        borderWidth: 1,
+                        borderColor: '#ccc',
+                        borderRadius: 5,
+                        paddingHorizontal: 10,
+                        backgroundColor: service.selected ? '#fff' : '#eee',
+                        textAlignVertical: 'center',  // vertically center the text
+                      }}
+                      value={String(service.quantity || '')}
+                      onChangeText={(val) => handleChange(key, val, true, 'quantity')}
+                    />
+                  </View>
+                </View>
+              );
+            })}
+
           </View>
         )}
 
 
-        {/* <View style={{ marginTop: 10 }}>
-            <Button title={loading ? 'Guardando...' : 'Guardar'} onPress={handleSubmit} disabled={loading} />
-          </View> */}
 
 
-
-        {loading && (
-          <View style={{ marginVertical: 20 }}>
-            <ActivityIndicator size="large" color="#0000ff" />
-          </View>
-        )}
       </ScrollView>
 
       <CustomAlert
@@ -283,3 +337,19 @@ const Form = () => {
 };
 
 export default Form;
+const styles = StyleSheet.create({
+  tableRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+
+  },
+  tableHeader: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#555',
+  },
+  tableCell: {
+    fontSize: 14,
+    color: '#333',
+  },
+});

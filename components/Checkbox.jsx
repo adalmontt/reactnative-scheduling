@@ -21,9 +21,9 @@ const Checkbox = ({ label, value, onValueChange }) => {
         name={value ? 'checkbox' : 'square-outline'}
         size={24}
         color={value ? '#007AFF' : '#888'}
-        style={{ marginRight: 8 }}
+        style={{}}
       />
-      <Text style={styles.label}>{formatServiceLabel(label)}</Text>
+      {/* <Text style={styles.label}>{formatServiceLabel(label)}</Text> */}
     </Pressable>
   );
 };
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
+
   },
   label: {
     fontSize: 16,

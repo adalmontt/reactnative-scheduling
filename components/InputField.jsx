@@ -12,10 +12,11 @@ const InputField = React.memo((props) => {
     editable = true,
     numberOfLines = 1,
     isRequired = false,
+    styleContainer,
   } = props;
 
   return (
-    <View style={styles.container}>
+    <View style={styleContainer ? styleContainer : styles.container}>
       <Text style={commonStyles.inputLabel}>
         {label}
         {isRequired && <Text style={{ color: 'red' }}> *</Text>}

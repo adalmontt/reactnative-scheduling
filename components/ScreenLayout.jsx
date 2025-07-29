@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, ActivityIndicator } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import Footer from './Footer';
+import { commonStyles } from '../styles/commonStyles';
 
 const ScreenLayout = ({
     children,
     footer = true,
+    isSpinner = false,
     style = {},
     contentContainerStyle = {},
     edges = ['bottom', 'left', 'right'],
@@ -28,6 +30,13 @@ const ScreenLayout = ({
                     <Footer />
                 </View>
             )}
+
+            {isSpinner && (
+                <View style={commonStyles.blockingOverlay}>
+                    <ActivityIndicator size="large" color="#fff" />
+                </View>
+            )}
+
         </SafeAreaView>
     );
 };

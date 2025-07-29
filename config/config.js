@@ -1,2 +1,3 @@
 export const GOOGLE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwtLLXwsjFxt3QyYLGnlZjgXNd2PM_2I3ZFHiAZCr2x9Lvs5B0d-yQ7AwKgrqoXpypx/exec?sheet=APP';
-export const GOOGLE_SHEET_PRECIOS_URL = 'https://script.google.com/macros/s/AKfycbwtLLXwsjFxt3QyYLGnlZjgXNd2PM_2I3ZFHiAZCr2x9Lvs5B0d-yQ7AwKgrqoXpypx/exec?sheet=PRECIOS';
+export const GOOGLE_SHEET_PRECIOS_URL = 'https://script.google.com/macros/s/AKfycbwtLLXwsjFxt3QyYLGnlZjgXNd2PM_2I3ZFHiAZCr2x9Lvs5B0d-yQ7AwKgrqoXpypx/exec?sheet=COMBOS';
+export const GOOGLE_SHEET_ITEMS_URL = 'https://script.google.com/macros/s/AKfycbwtLLXwsjFxt3QyYLGnlZjgXNd2PM_2I3ZFHiAZCr2x9Lvs5B0d-yQ7AwKgrqoXpypx/exec?sheet=ITEMS';
