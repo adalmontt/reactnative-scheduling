@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import Colors from '../constants/colors';
 import { commonStyles } from '../styles/commonStyles';
 import Label from './Label';
+import { categoryColors } from '../constants/constants';
 
 const PriceCard = ({ item, onLongPress, selected }) => {
     const router = useRouter();
@@ -18,9 +19,15 @@ const PriceCard = ({ item, onLongPress, selected }) => {
         ? item.sub_elementos
         : JSON.parse(item.sub_elementos || '[]');
 
+    const categoryColor = categoryColors[item.categoria?.toLowerCase()] || Colors.offWhite;
+
     return (
         <Pressable onPress={handlePress} onLongPress={() => onLongPress?.(item)}>
-            <View style={[styles.card, selected && styles.cardSelected]}>
+            <View style={[
+                styles.card,
+                { backgroundColor: categoryColor },
+                selected && styles.cardSelected
+            ]}>
                 <Text style={styles.name}>{item.nombre}</Text>
 
                 <View style={commonStyles.rowBetweenClose}>

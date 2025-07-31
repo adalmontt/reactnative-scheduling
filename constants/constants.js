@@ -20,3 +20,11 @@ export const categorias = [
         { label: 'Decoracion', value: 'decoracion' },
         { label: 'Miscelaneo', value: 'misc' },
     ];
+    
+export const categoryColors = {
+  quinta: '#e0f7fa',       // light cyan
+  comida: '#fff3e0',       // light orange
+  bebida: '#e8f5e9',       // light green
+  decoracion: '#f3e5f5',   // light purple
+  misc: '#fce4ec',         // light pink
+};

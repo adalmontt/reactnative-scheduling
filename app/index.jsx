@@ -57,7 +57,7 @@ const Home = () => {
   return (
 
     <SafeAreaView style={commonStyles.SafeAreaViewStyle} edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView
+      <KeyboardAvoidingView 
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
@@ -72,6 +72,8 @@ const Home = () => {
           {loading ? (
             <View style={styles.loaderContainer}>
               <ActivityIndicator size="large" color="#007bff" />
+              <Text style={{ marginTop: 10, color: '#666' }}>Cargando datos...</Text>
+
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>
@@ -97,8 +99,8 @@ const Home = () => {
 
           )}
 
-      {/* <FloatingActionButton onPress={() => router.push('/form')} /> */}
-      <Footer/>
+          {/* <FloatingActionButton onPress={() => router.push('/form')} /> */}
+          <Footer />
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

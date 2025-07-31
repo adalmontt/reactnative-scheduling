@@ -67,7 +67,7 @@ const Footer = () => {
       <FooterButton icon="home-outline" label="Inicio" onPress={() => handleNavigate('/')} color={iconColor} />
       <FooterButton icon="add-circle-outline" label="Agregar" onPress={() => handleNavigate('/form')} color={iconColor} />
       <FooterButton icon="pricetags-outline" label="Precios" onPress={() => handleNavigate('/precios')} color={iconColor} />
-      <FooterButton icon="calendar-outline" label="Calendario" onPress={() => handleNavigate('/calendar')} color={iconColor} />
+      <FooterButton icon="calculator-outline" label="Calculadora" onPress={() => handleNavigate('/calculadora')} color={iconColor} />
     </Animated.View>
   );
 };

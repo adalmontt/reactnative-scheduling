@@ -211,7 +211,7 @@ const Detail = () => {
     'chop_50',
     'tragos_50',
     'tragos_100',
-    'mozos'
+    'mozo',
   ];
 
 
@@ -433,6 +433,7 @@ const Detail = () => {
                         [key]: {
                           ...service,
                           selected: val,
+                          quantity: val ? 1 : 0
                         },
                       }));
                     }}

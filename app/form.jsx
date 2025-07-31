@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Button, Alert, View, Text, ActivityIndicator, Switch, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, StyleSheet, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import InputField from '../components/InputField';
 import DatePickerField from '../components/DatePickerField';
 import Dropdown from '../components/DropdownField';
-import { GOOGLE_SHEET_URL } from '../config/config';
+import { GOOGLE_SHEET_ITEMS_URL, GOOGLE_SHEET_URL } from '../config/config';
 import { commonStyles } from '../styles/commonStyles';
 import { formatDate, formatNumberWithDotsInput, removeDots } from '../utils/utils';
 import RadioGroup from '../components/RadioGroup';
@@ -29,7 +29,7 @@ const Form = () => {
   const [alertMessage, setAlertMessage] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [servicesList, setServicesList] = useState([]);
-
+  const [servicesFetched, setServicesFetched] = useState(false);
 
   const showAlert = (title, message) => {
     setAlertTitle(title);
@@ -37,20 +37,51 @@ const Form = () => {
     setAlertVisible(true);
   };
 
-  const emptyExtraServices = {
-    decoracion: { selected: false, quantity: 1 },
-    buffet: { selected: false, quantity: 1 },
-    asado: { selected: false, quantity: 1 },
-    hamburguesa: { selected: false, quantity: 1 },
-    lomito: { selected: false, quantity: 1 },
-    chop_50: { selected: false, quantity: 1 },
-    chop_30: { selected: false, quantity: 1 },
-    tragos_50: { selected: false, quantity: 1 },
-    tragos_100: { selected: false, quantity: 1 },
-    entrada: { selected: false, quantity: 1 },
-    bocaditos_dulces: { selected: false, quantity: 1 },
-    mozos: { selected: false, quantity: 1 },
+  const fetchServices = async () => {
+    try {
+      const response = await fetch(GOOGLE_SHEET_ITEMS_URL);
+      const data = await response.json();
+
+      const servicesMap = data.reduce((acc, item) => {
+        const key = item.nombre
+        acc[key] = { selected: false, quantity: 1 };
+        return acc;
+      }, {});
+
+      setFormData(prev => ({
+        ...prev,
+        extra_services: servicesMap,
+      }));
+
+      setServicesList(data); // Save raw list too, if needed elsewhere
+      setServicesFetched(true);
+    } catch (err) {
+      console.error('Failed to fetch services:', err);
+    }
   };
+
+  useEffect(() => {
+    if (!servicesFetched) {
+      fetchServices();
+    }
+  }, []);
+
+
+
+  // const emptyExtraServices = {
+  //   decoracion: { selected: false, quantity: 1 },
+  //   buffet: { selected: false, quantity: 1 },
+  //   asado: { selected: false, quantity: 1 },
+  //   hamburguesa: { selected: false, quantity: 1 },
+  //   lomito: { selected: false, quantity: 1 },
+  //   chop_50: { selected: false, quantity: 1 },
+  //   chop_30: { selected: false, quantity: 1 },
+  //   tragos_50: { selected: false, quantity: 1 },
+  //   tragos_100: { selected: false, quantity: 1 },
+  //   entrada: { selected: false, quantity: 1 },
+  //   bocaditos_dulces: { selected: false, quantity: 1 },
+  //   mozos: { selected: false, quantity: 1 },
+  // };
 
 
   const createInitialFormData = () => ({
@@ -65,20 +96,16 @@ const Form = () => {
     show: 'true',
     descripcion: '',
     creado: '',
-    extra_services: { ...emptyExtraServices },
+    extra_services: {},
 
   });
+  const [formData, setFormData] = useState(createInitialFormData());
 
   const handleToggleExtraServices = (value) => {
     setShowExtraFields(value);
-    setFormData(prev => ({
-      ...prev,
-      extra_services: value ? prev.extra_services : { ...emptyExtraServices }
-    }));
   };
 
 
-  const [formData, setFormData] = useState(createInitialFormData());
 
 
   const eventoItems = [

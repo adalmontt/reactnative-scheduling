@@ -23,9 +23,9 @@ const Header = () => {
           <Ionicons name="leaf-outline" size={20} color="green" />
           <Text style={{ fontFamily: 'PlayfairDisplayItalic', fontSize: 23 }}>Villa Francis</Text>
         </View>
-        <TouchableOpacity onPress={toggleMenu}>
+        {/* <TouchableOpacity onPress={toggleMenu}>
           <Ionicons name="menu" size={28} color="#333" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Overlay Menu */}

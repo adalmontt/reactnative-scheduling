@@ -4,6 +4,7 @@ import { Audio } from 'expo-av'; // fixed import
 import { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SystemUI from 'expo-system-ui';
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -11,28 +12,31 @@ export default function Layout() {
     PlayfairDisplayNormal: require('../assets/fonts/PlayfairDisplay-Normal.ttf'),
   });
 
-  useEffect(() => {
-    const configureAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-          playsInSilentModeIOS: true,
+useEffect(() => {
+  const configure = async () => {
+    try {
+      // Force light mode globally (system bars etc.)
+      await SystemUI.setBackgroundColorAsync('#ffffff');
+      await SystemUI.setAppearanceAsync('light');
 
-          shouldDuckAndroid: false,
-          interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
-          staysActiveInBackground: false,
-          playThroughEarpieceAndroid: false,
-        });
-      } catch (e) {
-        console.warn('Audio config error', e);
-      }
-    };
-
-    if (fontsLoaded) {
-      configureAudio();
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: false,
+        interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+        staysActiveInBackground: false,
+        playThroughEarpieceAndroid: false,
+      });
+    } catch (e) {
+      console.warn('Config error', e);
     }
-  }, [fontsLoaded]);
+  };
+
+  if (fontsLoaded) {
+    configure();
+  }
+}, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return (
@@ -52,6 +56,7 @@ export default function Layout() {
         <Stack.Screen name="precios" options={{ headerShown: false }} />
         <Stack.Screen name="preciosForm" options={{ headerShown: false }} />
         <Stack.Screen name="comboForm" options={{ headerShown: false }} />
+        <Stack.Screen name="calculadora" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
   );

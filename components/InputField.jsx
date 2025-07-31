@@ -13,6 +13,7 @@ const InputField = React.memo((props) => {
     numberOfLines = 1,
     isRequired = false,
     styleContainer,
+    styleInput,
   } = props;
 
   return (
@@ -25,7 +26,7 @@ const InputField = React.memo((props) => {
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        style={[styles.input]}
+        style={[styles.input, styleInput]}
         keyboardType={keyboardType}
         editable={editable}
         numberOfLines={numberOfLines}
