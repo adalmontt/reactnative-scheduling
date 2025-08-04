@@ -10,6 +10,8 @@ export default function Layout() {
   const [fontsLoaded] = useFonts({
     PlayfairDisplayItalic: require('../assets/fonts/PlayfairDisplay-Italic.ttf'),
     PlayfairDisplayNormal: require('../assets/fonts/PlayfairDisplay-Normal.ttf'),
+    RobotoItalic: require('../assets/fonts/Roboto-Italic.ttf'),
+    Roboto: require('../assets/fonts/Roboto-VariableFont.ttf'),
   });
 
 useEffect(() => {
@@ -56,7 +58,7 @@ useEffect(() => {
         <Stack.Screen name="precios" options={{ headerShown: false }} />
         <Stack.Screen name="preciosForm" options={{ headerShown: false }} />
         <Stack.Screen name="comboForm" options={{ headerShown: false }} />
-        <Stack.Screen name="calculadora" options={{ headerShown: false }} />
+        <Stack.Screen name="Calculadora/calculadora" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
   );

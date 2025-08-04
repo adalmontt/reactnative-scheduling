@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import Colors from '../constants/colors';
 
 export const commonStyles = StyleSheet.create({
   container: {
@@ -14,7 +15,15 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 20,
     fontFamily: 'PlayfairDisplayItalic',
   },
-
+  iconAdd: {
+    alignSelf: 'center',
+    backgroundColor: 'white',
+    borderRadius: 50,
+    borderColor: 'black',
+    borderWidth: 1,
+    padding: 1,
+    marginTop: 10,
+  },
   containerCards: {
     flex: 1,
     paddingTop: 50,
@@ -67,4 +76,33 @@ export const commonStyles = StyleSheet.create({
     alignSelf: 'center', // center horizontally without absolute positioning
     marginVertical: 20,  // spacing from list
   },
+
+  // BADGE
+
+      chipsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 8,
+    },
+
+     chip: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: Colors.lightBlue,
+        paddingVertical: 4,
+        paddingHorizontal: 10,
+        borderRadius: 20,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+
+    chipText: {
+        marginRight: 6,
+    },
+
+    removeBtn: {
+        color: '#ff3333',
+        fontWeight: 'bold',
+    },
+
 });

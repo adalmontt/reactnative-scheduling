@@ -57,7 +57,7 @@ const Home = () => {
   return (
 
     <SafeAreaView style={commonStyles.SafeAreaViewStyle} edges={['bottom', 'left', 'right']}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0} // adjust if you have header/navbar
@@ -160,6 +160,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   sectionHeader: {
+    alignSelf: 'flex-start',
+
     fontSize: 14,
     fontWeight: 'bold',
     fontStyle: 'italic',
@@ -170,5 +172,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginTop: 10,
     borderRadius: 6,
+    backgroundColor: 'black',
+    color: 'white'
   },
 });

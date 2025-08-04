@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 10,
     marginVertical: 8,
+    
   },
   disabled: {
     opacity: 0.6,

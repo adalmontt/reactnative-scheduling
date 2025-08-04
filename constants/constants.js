@@ -14,13 +14,13 @@ export const SERVICE_LABELS = {
 
 
 export const categorias = [
-        { label: 'Quinta', value: 'quinta' },
-        { label: 'Comida', value: 'comida' },
-        { label: 'Bebida', value: 'bebida' },
-        { label: 'Decoracion', value: 'decoracion' },
-        { label: 'Miscelaneo', value: 'misc' },
-    ];
-    
+  { label: 'Quinta', value: 'quinta' },
+  { label: 'Comida', value: 'comida' },
+  { label: 'Bebida', value: 'bebida' },
+  { label: 'Decoracion', value: 'decoracion' },
+  { label: 'Miscelaneo', value: 'misc' },
+];
+
 export const categoryColors = {
   quinta: '#e0f7fa',       // light cyan
   comida: '#fff3e0',       // light orange

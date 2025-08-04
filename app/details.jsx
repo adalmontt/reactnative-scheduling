@@ -1,23 +1,20 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Switch, Button, TextInput, TouchableWithoutFeedback, Keyboard, FlatList, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Switch, Button, TextInput, TouchableWithoutFeedback, Keyboard, FlatList, Pressable, Modal, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { formatDate, formatDateDetails, formatNumberWithDots, parseExtraServices, removeDots } from '../utils/utils';
 import { commonStyles } from '../styles/commonStyles';
-import FloatingActionButton from '../components/FloatingActionButton';
 import { useEffect, useState } from 'react';
 import ModalConfirm from '../components/ModalConfirm';
-import { GOOGLE_SHEET_URL } from '../config/config';
+import { GOOGLE_SHEET_ITEMS_URL, GOOGLE_SHEET_URL } from '../config/config';
 import CustomAlert from '../components/CustomAlert';
 import HeaderWithBack from '../components/headerWithBack';
-import { SERVICE_LABELS } from '../constants/constants';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import EditableField from '../components/EditableField';
-import Footer from '../components/Footer';
 import ScreenLayout from '../components/ScreenLayout';
 import IconButton from '../components/IconButton';
-import { generateAndSharePDF } from '../utils/generatePDF';
 import SharePDFButton from '../components/SharePDFButton';
 import { Ionicons } from '@expo/vector-icons';
-import Checkbox from '../components/Checkbox';
+import ModalList from '../components/ModalList';
+import { categorias } from '../constants/constants';
 
 
 
@@ -29,9 +26,10 @@ const Detail = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
-  const [isHiding, setIsHiding] = useState(false);
   const [servicesState, setServicesState] = useState({});
   const [isEditing, setIsEditing] = useState(false);
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [availableServiceKeys, setAvailableServiceKeys] = useState([]);
 
   // Editable fields
   const [descripcion, setDescripcion] = useState('');
@@ -40,7 +38,7 @@ const Detail = () => {
   const [pagado, setPagado] = useState('');
   const [montoTotal, setMontoTotal] = useState('');
 
-  
+
 
   // Carga los datos
   useEffect(() => {
@@ -105,9 +103,14 @@ const Detail = () => {
   };
 
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
 
   // Parsea extra services
   useEffect(() => {
+
     if (item?.extra_services) {
       // item.extra_services may come as an object or string, handle both cases:
       let parsedServices = {};
@@ -149,10 +152,6 @@ const Detail = () => {
   }, [item]);
 
 
-  // Swtich extra services
-  const handleToggleService = (key) => {
-    setServicesState(prev => ({ ...prev, [key]: !prev[key] }));
-  };
 
   // Post edit
   const handleEdit = async () => {
@@ -186,33 +185,57 @@ const Detail = () => {
 
       const result = await response.json();
       if (result.result === 'updated') {
-        showAlert('Actualizado', 'Servicios adicionales actualizados.');
+        showAlert('Actualizado', 'Evento actualizado.');
       } else {
-        showAlert('Error', 'No se pudo actualizar los servicios.');
+        showAlert('Error', 'No se pudo actualizar el evento.');
       }
     } catch (err) {
-      console.error('Error al enviar extra services:', err);
-      showAlert('Error', 'Fallo la actualización.');
+      showAlert('Error', 'No se pudo actualizar el evento.');
     } finally {
       setIsEditing(false);
     }
   };
 
 
-  const orderedKeys = [
-    'decoracion',
-    'asado',
-    'buffet',
-    'lomito',
-    'hamburguesa',
-    'entrada',
-    'bocaditos_dulces',
-    'chop_30',
-    'chop_50',
-    'tragos_50',
-    'tragos_100',
-    'mozo',
-  ];
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch(GOOGLE_SHEET_ITEMS_URL);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+
+
+      // Sort by category (based on predefined order) then by nombre
+      const categoriasOrder = categorias.map(c => c.value);
+
+      const sorted = [...data]
+        .filter(item => item.categoria.toLowerCase() !== 'quinta') // ⛔ exclude "quinta"
+        .sort((a, b) => {
+          const catA = categoriasOrder.indexOf(a.categoria);
+          const catB = categoriasOrder.indexOf(b.categoria);
+          if (catA !== catB) return catA - catB;
+
+
+          return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+        });
+
+      // Normalize nombre to key format (used internally)
+      const keysFromData = sorted.map(item =>
+        item.nombre
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '_')
+          .replace(/[^a-z0-9_]/g, '')
+      );
+      setAvailableServiceKeys(keysFromData);
+    } catch (err) {
+      Alert("Error", "Error al recuperar los items");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 
 
@@ -227,8 +250,7 @@ const Detail = () => {
     return (
 
       <ScreenLayout
-        footer='false'
-        isSpinner={isEditing}
+        isSpinner={isEditing || loading}
       >
 
         <HeaderWithBack
@@ -248,17 +270,17 @@ const Detail = () => {
 
             <View style={commonStyles.rowBetween}>
               <Text style={styles.label}>Fecha:</Text>
-              <Text style={styles.dataWhite}>{formatDateDetails(item.fecha)}</Text>
+              <Text style={styles.data}>{formatDateDetails(item.fecha)}</Text>
             </View>
 
             <View style={commonStyles.rowBetween}>
               <Text style={styles.label}>Cliente:</Text>
-              <Text style={styles.dataWhite}>{item.cliente}</Text>
+              <Text style={styles.data}>{item.cliente}</Text>
             </View>
 
             <View style={commonStyles.rowBetween}>
               <Text style={styles.label}>Evento:</Text>
-              <Text style={styles.dataWhite}>{item.evento}</Text>
+              <Text style={styles.data}>{item.evento}</Text>
             </View>
 
             <EditableField
@@ -266,7 +288,7 @@ const Detail = () => {
               value={montoTotal}
               onChange={setMontoTotal}
               keyboardType="numeric"
-              textStyle={styles.dataWhite}
+              textStyle={styles.data}
               labelStyle={styles.label}
               prefix="Gs. "
               formatWithDots={true}
@@ -277,7 +299,7 @@ const Detail = () => {
               value={cantidadPersonas}
               onChange={setCantidadPersonas}
               keyboardType="numeric"
-              textStyle={styles.dataWhite}
+              textStyle={styles.data}
               labelStyle={styles.label}
             />
 
@@ -286,7 +308,7 @@ const Detail = () => {
               value={pagado}
               onChange={setPagado}
               keyboardType="numeric"
-              textStyle={styles.dataWhite}
+              textStyle={styles.data}
               labelStyle={styles.label}
               prefix="Gs. "
               formatWithDots={true}
@@ -296,24 +318,24 @@ const Detail = () => {
 
           </View>
 
-          <View style={{ marginTop: 30, marginLeft: 20 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 14 }}>Compartir PDF</Text>
+          {/* <Text style={[styles.secondayTitle, { marginTop: 30 }]}>Compartir PDF</Text>
 
-            <View style={{ marginTop: 10 }}>
-              <SharePDFButton
-                data={{
-                  cliente: item.cliente,
-                  evento: item.evento,
-                  fecha: item.fecha,
-                  cantidad_personas: cantidadPersonas,
-                  descripcion: descripcion,
-                  extra_services: item.extra_services,
-                  monto_total: montoTotal,
-                  pagado: pagado,
-                }}
-              />
-            </View>
-          </View>
+
+          <View style={{ marginTop: 10, marginLeft: 20 }}>
+            <SharePDFButton
+              data={{
+                cliente: item.cliente,
+                evento: item.evento,
+                fecha: item.fecha,
+                cantidad_personas: cantidadPersonas,
+                descripcion: descripcion,
+                extra_services: item.extra_services,
+                monto_total: montoTotal,
+                pagado: pagado,
+              }}
+            />
+          </View> */}
+
 
           <View style={{ marginTop: 30 }}>
 
@@ -340,139 +362,46 @@ const Detail = () => {
             )}
 
 
-            <Text style={styles.secondayTitle}>Servicios Adicionaless</Text>
-
-            {/* <FlatList
-              data={orderedKeys}
-              keyExtractor={(key) => key}
-              scrollEnabled={false}
-              renderItem={({ item: key }) => {
-                const service = servicesState[key] || { selected: false, quantity: 0 };
-                return (
-                  <View style={commonStyles.rowBetweenClose}>
-                    <Text style={styles.labelAdditional}>
-                      {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </Text>
-                    <Switch
-                      value={service.selected}
-                      onValueChange={() => {
-                        setServicesState(prev => ({
-                          ...prev,
-                          [key]: {
-                            selected: !service.selected,
-                            quantity: service.quantity
-                          },
-                        }));
-                      }}
-                    />
-                    {service.selected && (
-                      <TextInput
-                        style={{
-                          width: 60,
-                          borderWidth: 1,
-                          borderColor: '#ccc',
-                          borderRadius: 4,
-                          paddingHorizontal: 8,
-                          paddingVertical: 4,
-                          marginLeft: 10,
-                          textAlign: 'center',
-                        }}
-                        keyboardType="numeric"
-                        value={String(service.quantity)}
-                        onChangeText={(val) => {
-                          const qty = val.replace(/[^0-9]/g, '');
-                          setServicesState(prev => ({
-                            ...prev,
-                            [key]: {
-                              selected: service.selected,
-                              quantity: Number(qty) || 0,
-                            },
-                          }));
-                        }}
-                      />
-                    )}
-                  </View>
-                );
-              }}
-            /> */}
-
-
             <View style={{ marginTop: 10 }}>
-              {/* Header */}
-              <View style={[styles.tableRow, { marginBottom: 10 }]}>
-                <Text style={[styles.tableHeader, { flex: 1 }]}>✔</Text>
-                <Text style={[styles.tableHeader, { flex: 3 }]}>Servicio</Text>
-                <Text style={[styles.tableHeader, { flex: 2 }]}>Cantidad</Text>
+              <View style={commonStyles.rowBetween}>
+                <Text style={styles.secondayTitle}>Servicios Seleccionados</Text>
+
+                <Pressable
+                  onPress={() => setShowServiceModal(true)}
+                  style={commonStyles.iconAdd}
+                >
+                  <Ionicons name="add" size={24} color="black" />
+                </Pressable>
               </View>
 
-              {orderedKeys.map((key) => {
-                const service = servicesState[key] || { selected: false, quantity: 0 };
-                const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-                return (
-                  <View
-                    key={key}
-                    style={[
-                      styles.tableRow,
-                      {
-                        backgroundColor: service.selected ? '#ADD8E6' : 'white',
-                        alignItems: 'center',
-                        paddingVertical: 8,
-                        paddingHorizontal: 10,
-                        borderRadius: 6,
-                        marginBottom: 8,
-                      },
-                    ]}
-                  >
-                <View style={{ flex: 1, justifyContent: 'center' }}>
-                  <Checkbox
-                    value={service.selected}
-                    onValueChange={(val) => {
-                      setServicesState(prev => ({
-                        ...prev,
-                        [key]: {
-                          ...service,
-                          selected: val,
-                          quantity: val ? 1 : 0
-                        },
-                      }));
-                    }}
-                  />
-                </View>
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+                {Object.entries(servicesState)
+                  .filter(([_, val]) => val.selected)
+                  .map(([key, val]) => {
+                    const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-                    <Text style={[styles.tableCell, { flex: 3 }]}>{label}</Text>
-
-                    <View style={{ flex: 2, justifyContent: 'center' }}>
-                      <TextInput
-                        placeholder="0"
-                        keyboardType="numeric"
-                        editable={service.selected}
-                        style={{
-                          opacity: service.selected ? 1 : 0.4,
-                          height: 40,
-                          borderWidth: 1,
-                          borderColor: '#ccc',
-                          borderRadius: 5,
-                          paddingHorizontal: 10,
-                          backgroundColor: service.selected ? '#fff' : '#eee',
-                          textAlign: 'center',
-                        }}
-                        value={String(service.quantity || '')}
-                        onChangeText={(val) => {
-                          const qty = val.replace(/[^0-9]/g, '');
+                    return (
+                      <View key={key} style={commonStyles.chip}>
+                        <Text style={commonStyles.chipText}>{val.quantity != 1 ? val.quantity : ""} {label}</Text>
+                        <Text style={commonStyles.removeBtn} onPress={() => {
                           setServicesState(prev => ({
                             ...prev,
-                            [key]: {
-                              ...service,
-                              quantity: Number(qty) || 0,
-                            },
+                            [key]: { selected: false, quantity: 0 },
                           }));
-                        }}
-                      />
-                    </View>
-                  </View>
-                );
-              })}
+                        }}>✕</Text>
+
+                      </View>
+                    );
+                  })}
+              </View>
+
+
+
+
+
+
+
             </View>
 
 
@@ -481,12 +410,27 @@ const Detail = () => {
                 title="Actualizar"
                 iconName="refresh"
                 onPress={handleEdit}
-                backgroundColor="#007bff"
+                backgroundColor="black"
                 iconColor="#fff"
                 loading={false}
                 disabled={isEditing}
               />
             </View>
+
+            <ModalList
+              visible={showServiceModal}
+              title="Agregar Servicio"
+              items={availableServiceKeys}
+              onSelect={(key, qty) => {
+                setServicesState(prev => ({
+                  ...prev,
+                  [key]: { selected: true, quantity: qty || 1 },
+                }));
+                setShowServiceModal(false);
+              }}
+              onClose={() => setShowServiceModal(false)}
+            />
+
 
           </View>
 
@@ -510,7 +454,7 @@ const Detail = () => {
         </ScrollView>
 
 
-      </ScreenLayout>
+      </ScreenLayout >
 
     );
   }
@@ -519,18 +463,11 @@ const Detail = () => {
 
 const styles = StyleSheet.create({
 
-  descripcion: {
-    fontSize: 16,
-    marginBottom: 15,
-    flex: 1
-  },
   label: {
     fontSize: 16,
     fontWeight: '600',
     marginTop: 10,
-    color: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: 'white',
+    fontFamily: 'Roboto',
   },
   labelAdditional: {
     fontSize: 16,
@@ -542,29 +479,24 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: 'white',
   },
+  data: {
+    fontSize: 16,
+    marginTop: 10,
+    textAlign: 'right',
+    fontFamily: 'Roboto',
+
+  },
   dataAdditional: {
     fontSize: 16,
     fontWeight: '600',
     marginTop: 10,
   },
   secondayTitle: {
-    fontSize: 20,
-    fontFamily: 'PlayfairDisplayNormal',
-    marginBottom: 15,
+    fontSize: 16,
+    fontFamily: 'Roboto',
+    marginBottom: 15
   },
 
-  overview: {
-    backgroundColor: '#007bff',
-    padding: 20,
-    color: 'white',
-    borderRadius: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 12,
-
-  },
   value: {
     fontSize: 18,
     color: 'white',
@@ -580,6 +512,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 999,
   },
+
   descripcion: {
     fontSize: 16,
     padding: 8,
@@ -593,7 +526,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     minHeight: 60,
   },
-    tableRow: {
+  tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
 
@@ -608,7 +541,41 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 
-
 });
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  container: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    elevation: 5,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  item: {
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  itemText: {
+    fontSize: 16,
+  },
+  cancelButton: {
+    marginTop: 15,
+    alignSelf: 'center',
+  },
+});
+
 
 export default Detail;

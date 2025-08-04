@@ -1,17 +1,23 @@
 {
   "expo": {
     "scheme": "scheduling",
-    "name": "reactnative-scheduling",
+    "name": "Villa Francis",
     "slug": "reactnative-scheduling",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/appIcon.png",
+    "splash": {
+      "image": "./assets/appIcon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "minSdkVersion": 21,
       "adaptiveIcon": {
         "foregroundImage": "./assets/appIcon.png",
         "backgroundColor": "#ffffff"
@@ -22,7 +28,8 @@
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
       "edgeToEdgeEnabled": true,
-      "package": "com.adalmont.reactnativescheduling"
+      "package": "com.adalmont.villafrancis",
+      "label": "Villa Francis"
     },
     "web": {
       "favicon": "./assets/favicon.png"

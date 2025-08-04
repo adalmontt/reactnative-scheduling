@@ -1,26 +1,26 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Button, Alert, View, Text, ActivityIndicator, Switch, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, SectionList, StyleSheet, FlatList, Pressable } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import InputField from '../components/InputField';
-import DatePickerField from '../components/DatePickerField';
-import Dropdown from '../components/DropdownField';
-import { GOOGLE_SHEET_ITEMS_URL, GOOGLE_SHEET_PRECIOS_URL, GOOGLE_SHEET_URL } from '../config/config';
-import { commonStyles } from '../styles/commonStyles';
-import { formatDate, formatNumberWithDotsInput, removeDots } from '../utils/utils';
-import RadioGroup from '../components/RadioGroup';
-import CustomAlert from '../components/CustomAlert';
+import InputField from '../../components/InputField';
+import DatePickerField from '../../components/DatePickerField';
+import Dropdown from '../../components/DropdownField';
+import { GOOGLE_SHEET_ITEMS_URL, GOOGLE_SHEET_PRECIOS_URL, GOOGLE_SHEET_URL } from '../../config/config';
+import { commonStyles } from '../../styles/commonStyles';
+import { formatDate, formatNumberWithDotsInput, removeDots } from '../../utils/utils';
+import RadioGroup from '../../components/RadioGroup';
+import CustomAlert from '../../components/CustomAlert';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import HeaderWithBack from '../components/headerWithBack';
-import Checkbox from '../components/Checkbox';
-import Footer from '../components/Footer';
-import ModalConfirm from '../components/ModalConfirm';
+import HeaderWithBack from '../../components/headerWithBack';
+import Checkbox from '../../components/Checkbox';
+import Footer from '../../components/Footer';
+import ModalConfirm from '../../components/ModalConfirm';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ScreenLayout from '../components/ScreenLayout';
-import PriceComboCard from '../components/PriceComboCard';
-import Colors from '../constants/colors';
+import ScreenLayout from '../../components/ScreenLayout';
+import PriceComboCard from '../../components/PriceComboCard';
+import Colors from '../../constants/colors';
 import { Ionicons } from '@expo/vector-icons';
-import PriceCard from '../components/PriceCard';
-import { categorias, categoryColors } from '../constants/constants';
+import PriceCard from '../../components/PriceCard';
+import { categorias, categoryColors } from '../../constants/constants';
 
 
 const Precios = () => {
@@ -38,6 +38,7 @@ const Precios = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedItemToDelete, setSelectedItemToDelete] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+const [collapsedSections, setCollapsedSections] = useState({});
 
   const showAlert = (title, message) => {
     setAlertTitle(title);
@@ -46,12 +47,24 @@ const Precios = () => {
   };
 
 
-  const groupedItems = categorias.map(cat => ({
+const groupedItems = categorias.map(cat => {
+  const items = cartItems.filter(item => item.categoria === cat.value);
+  return {
     title: cat.label,
-    categorias: cat.value,
-    data: cartItems.filter(item => item.categoria === cat.value),
-  })).filter(section => section.data.length > 0);
+    categoria: cat.value,
+    data: collapsedSections[cat.value] ? [] : items,
+    allData: items, // needed for total even if hidden
+  };
+}).filter(section => section.allData.length > 0);
 
+
+
+  const toggleSection = (categoria) => {
+  setCollapsedSections(prev => ({
+    ...prev,
+    [categoria]: !prev[categoria],
+  }));
+};
 
   //GET LOGIC
   const fetchData = async () => {
@@ -122,9 +135,9 @@ useEffect(() => {
 
       <HeaderWithBack
         title="Calculadora"
-        sideIcon="add-circle-outline"
-        sideFunction={() => setShowSaveModal(true)}
-        sideTitle="Agregar"
+        // sideIcon="add-circle-outline"
+        // sideFunction={() => setShowSaveModal(true)}
+        // sideTitle="Agregar"
       />
 
       <Text style={styles.grandTotal}>Total: Gs. {grandTotal.toLocaleString()}</Text>

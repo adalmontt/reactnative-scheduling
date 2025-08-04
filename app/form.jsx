@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, Button, Alert, View, Text, ActivityIndicator, Switch, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, StyleSheet, TextInput } from 'react-native';
+import { ScrollView, Button, Alert, View, Text, ActivityIndicator, Switch, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, StyleSheet, TextInput, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import InputField from '../components/InputField';
 import DatePickerField from '../components/DatePickerField';
@@ -17,6 +17,9 @@ import ModalConfirm from '../components/ModalConfirm';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ScreenLayout from '../components/ScreenLayout';
 import Colors from '../constants/colors';
+import { Ionicons } from '@expo/vector-icons';
+import ModalList from '../components/ModalList';
+import { categorias } from '../constants/constants';
 
 
 const Form = () => {
@@ -28,8 +31,10 @@ const Form = () => {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [showSaveModal, setShowSaveModal] = useState(false);
-  const [servicesList, setServicesList] = useState([]);
-  const [servicesFetched, setServicesFetched] = useState(false);
+
+  const [showServiceModal, setShowServiceModal] = useState(false);
+  const [servicesState, setServicesState] = useState({});
+  const [availableServiceKeys, setAvailableServiceKeys] = useState([]);
 
   const showAlert = (title, message) => {
     setAlertTitle(title);
@@ -37,51 +42,50 @@ const Form = () => {
     setAlertVisible(true);
   };
 
-  const fetchServices = async () => {
+
+  const fetchData = async () => {
     try {
       const response = await fetch(GOOGLE_SHEET_ITEMS_URL);
+      if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
 
-      const servicesMap = data.reduce((acc, item) => {
-        const key = item.nombre
-        acc[key] = { selected: false, quantity: 1 };
-        return acc;
-      }, {});
+      // Sort by category (based on predefined order) then by nombre
+      const categoriasOrder = categorias.map(c => c.value);
 
-      setFormData(prev => ({
-        ...prev,
-        extra_services: servicesMap,
-      }));
+      const sorted = [...data]
+        .filter(item => item.categoria.toLowerCase() !== 'quinta') // ⛔ exclude "quinta"
+        .sort((a, b) => {
+          const catA = categoriasOrder.indexOf(a.categoria);
+          const catB = categoriasOrder.indexOf(b.categoria);
+          if (catA !== catB) return catA - catB;
 
-      setServicesList(data); // Save raw list too, if needed elsewhere
-      setServicesFetched(true);
+          return a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' });
+        });
+
+      // Normalize nombre to key format (used internally)
+      const keysFromData = sorted.map(item =>
+        item.nombre
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/\s+/g, '_')
+          .replace(/[^a-z0-9_]/g, '')
+      );
+      setAvailableServiceKeys(keysFromData);
     } catch (err) {
-      console.error('Failed to fetch services:', err);
+      Alert("Error", "Error al recuperar los items");
+    } finally {
+      setLoading(false);
     }
   };
 
+
+
   useEffect(() => {
-    if (!servicesFetched) {
-      fetchServices();
-    }
+    fetchData();
   }, []);
 
 
-
-  // const emptyExtraServices = {
-  //   decoracion: { selected: false, quantity: 1 },
-  //   buffet: { selected: false, quantity: 1 },
-  //   asado: { selected: false, quantity: 1 },
-  //   hamburguesa: { selected: false, quantity: 1 },
-  //   lomito: { selected: false, quantity: 1 },
-  //   chop_50: { selected: false, quantity: 1 },
-  //   chop_30: { selected: false, quantity: 1 },
-  //   tragos_50: { selected: false, quantity: 1 },
-  //   tragos_100: { selected: false, quantity: 1 },
-  //   entrada: { selected: false, quantity: 1 },
-  //   bocaditos_dulces: { selected: false, quantity: 1 },
-  //   mozos: { selected: false, quantity: 1 },
-  // };
 
 
   const createInitialFormData = () => ({
@@ -100,10 +104,6 @@ const Form = () => {
 
   });
   const [formData, setFormData] = useState(createInitialFormData());
-
-  const handleToggleExtraServices = (value) => {
-    setShowExtraFields(value);
-  };
 
 
 
@@ -149,13 +149,14 @@ const Form = () => {
     setShowSaveModal(false);
     setLoading(true);
 
-
-    const cleanedExtraServices = Object.entries(formData.extra_services)
-      .filter(([_, val]) => val.selected)
+    const cleanedExtraServices = Object.entries(servicesState)
+      .filter(([_, val]) => val.selected && val.quantity > 0)
       .reduce((acc, [key, val]) => {
         acc[key] = val.quantity;
         return acc;
       }, {});
+
+    ;
 
 
     const cleanData = {
@@ -275,70 +276,39 @@ const Form = () => {
           numberOfLines={3}
         />
 
+
         <View style={commonStyles.rowBetween}>
-          <Text style={commonStyles.toggleText}>¿Agregar servicios adicionales?</Text>
-          <Switch
-            value={showExtraFields}
-            onValueChange={handleToggleExtraServices}
-          />
+          <Text style={[styles.secondayTitle, { fontWeight: 'bold' }]}>¿Agregar servicios adicionales?</Text>
+
+          <Pressable
+            onPress={() => setShowServiceModal(true)}
+            style={commonStyles.iconAdd}
+          >
+            <Ionicons name="add" size={24} color="black" />
+          </Pressable>
         </View>
 
-        {showExtraFields && formData?.extra_services && (
-          <View style={{ marginTop: 10 }}>
-            {/* Header */}
-            <View style={[styles.tableRow, { marginBottom: 10 }]}>
-              <Text style={[styles.tableHeader, { flex: 1 }]}>✔</Text>
-              <Text style={[styles.tableHeader, { flex: 3 }]}>Servicio</Text>
-              <Text style={[styles.tableHeader, { flex: 2 }]}>Cantidad</Text>
-            </View>
 
-            {Object.entries(formData.extra_services).map(([key, service]) => {
-              const label =
-                typeof key === 'string'
-                  ? key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ')
-                  : 'Servicio';
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+          {Object.entries(servicesState)
+            .filter(([_, val]) => val.selected)
+            .map(([key, val]) => {
+              const label = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
               return (
-                <View key={key} style={[styles.tableRow,
-                {
-                  backgroundColor: service.selected ? Colors.lightBlue : 'white', // soft green / soft red
-                  justifyContent: 'center', alignItems: 'center', padding: 10,
-                },
-                ]}>
-                  <View style={{ flex: 1, justifyContent: 'center', }}>
-                    <Checkbox
-                      value={service.selected}
-                      onValueChange={(val) => handleChange(key, val, true, 'selected')}
-                    />
-                  </View>
+                <View key={key} style={commonStyles.chip}>
+                  <Text style={commonStyles.chipText}>{val.quantity != 1 ? val.quantity : ""} {label}</Text>
+                  <Text style={commonStyles.removeBtn} onPress={() => {
+                    setServicesState(prev => ({
+                      ...prev,
+                      [key]: { selected: false, quantity: 0 },
+                    }));
+                  }}>✕</Text>
 
-                  <Text style={[styles.tableCell, { flex: 3 }]}>{label}</Text>
-
-                  <View style={{ flex: 2, justifyContent: 'center' }}>
-                    <TextInput
-                      placeholder="0"
-                      keyboardType="numeric"
-                      editable={service.selected}
-                      style={{
-                        opacity: service.selected ? 1 : 0.3,
-                        height: 40,
-                        borderWidth: 1,
-                        borderColor: '#ccc',
-                        borderRadius: 5,
-                        paddingHorizontal: 10,
-                        backgroundColor: service.selected ? '#fff' : '#eee',
-                        textAlignVertical: 'center',  // vertically center the text
-                      }}
-                      value={String(service.quantity || '')}
-                      onChangeText={(val) => handleChange(key, val, true, 'quantity')}
-                    />
-                  </View>
                 </View>
               );
             })}
-
-          </View>
-        )}
+        </View>
 
 
 
@@ -357,6 +327,21 @@ const Form = () => {
         onCancel={() => setShowSaveModal(false)}
         onConfirm={handleSubmit}
       />
+
+      <ModalList
+        visible={showServiceModal}
+        title="Agregar Servicio"
+        items={availableServiceKeys}
+        onSelect={(key, qty) => {
+          setServicesState(prev => ({
+            ...prev,
+            [key]: { selected: true, quantity: qty || 1 },
+          }));
+          setShowServiceModal(false);
+        }}
+        onClose={() => setShowServiceModal(false)}
+      />
+
 
 
     </ScreenLayout>

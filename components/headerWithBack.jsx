@@ -45,6 +45,7 @@ const HeaderWithBack = ({
           <Ionicons name={sideIcon} size={24} color={sideColor} />
         </TouchableOpacity>
       )}
+  
     </View>
   );
 };
