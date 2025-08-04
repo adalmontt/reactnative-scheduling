@@ -74,7 +74,6 @@ const Detail = () => {
   // Delete
   const handleDelete = async () => {
     setShowDeleteModal(false);
-    setIsHiding(true);
     setIsEditing(true);
     const body = {
       id: item.id,
