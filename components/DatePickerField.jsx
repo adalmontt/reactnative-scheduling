@@ -10,16 +10,16 @@ const DatePickerField = ({ label, date, setDate, isRequired = false }) => {
   const onChange = (event, selectedDate) => {
     setShowPicker(Platform.OS === 'ios');
     if (selectedDate) {
-      setDate(selectedDate.toISOString().split('T')[0]);
+      setDate(selectedDate.toLocaleDateString('en-CA'));
     }
   };
 
   return (
     <>
-<Text style={commonStyles.inputLabel}>
-  {label}
-  {isRequired && <Text style={{ color: 'red' }}> *</Text>}
-</Text>  
+      <Text style={commonStyles.inputLabel}>
+        {label}
+        {isRequired && <Text style={{ color: 'red' }}> *</Text>}
+      </Text>
 
       <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.input}>
         <Text style={{ color: date ? '#000' : '#aaa' }}>{date || `Seleccionar ${label}`}</Text>
@@ -40,7 +40,7 @@ const DatePickerField = ({ label, date, setDate, isRequired = false }) => {
 export default DatePickerField;
 
 const styles = StyleSheet.create({
-    label: {
+  label: {
     fontWeight: 'bold',
     marginBottom: 4,
   },
