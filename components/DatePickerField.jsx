@@ -10,8 +10,19 @@ const DatePickerField = ({ label, date, setDate, isRequired = false }) => {
   const onChange = (event, selectedDate) => {
     setShowPicker(Platform.OS === 'ios');
     if (selectedDate) {
-      setDate(selectedDate.toLocaleDateString('en-CA'));
+      // Save as YYYY-MM-DD
+      const year = selectedDate.getFullYear();
+      const month = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+      const day = selectedDate.getDate().toString().padStart(2, '0');
+      setDate(`${year}-${month}-${day}`);
     }
+  };
+
+  // Format to DD/MM/YYYY for display
+  const formatDisplayDate = (dateString) => {
+    if (!dateString) return null;
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   return (
@@ -22,8 +33,11 @@ const DatePickerField = ({ label, date, setDate, isRequired = false }) => {
       </Text>
 
       <TouchableOpacity onPress={() => setShowPicker(true)} style={styles.input}>
-        <Text style={{ color: date ? '#000' : '#aaa' }}>{date || `Seleccionar ${label}`}</Text>
+        <Text style={{ color: date ? '#000' : '#aaa' }}>
+          {date ? formatDisplayDate(date) : `Seleccionar ${label}`}
+        </Text>
       </TouchableOpacity>
+
       {showPicker && (
         <DateTimePicker
           value={date ? new Date(date) : new Date()}

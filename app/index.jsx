@@ -91,7 +91,7 @@ const Home = () => {
               renderSectionHeader={({ section: { title } }) => (
                 <Text style={styles.sectionHeader}>{title}</Text>
               )}
-              contentContainerStyle={styles.listContent}
+              contentContainerStyle={[styles.listContent, { paddingBottom: 40 }]}
               refreshing={refreshing}
               onRefresh={onRefresh}
               showsVerticalScrollIndicator={false}

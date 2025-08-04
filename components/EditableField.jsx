@@ -69,7 +69,6 @@ const styles = StyleSheet.create({
   },
   input: {
    
-    color: "white",
     borderColor: '#ccc',
     textAlign: 'right',
   },
