@@ -168,13 +168,13 @@ const Precios = () => {
              <PriceCard
                 item={item}
                 selected={selectedItemToDelete?.id === item.id}
-                onLongPress={(pressedItem) => {
-                  if (selectedItemToDelete?.id === pressedItem.id) {
-                    setSelectedItemToDelete(null); // toggle off
-                  } else {
-                    setSelectedItemToDelete(pressedItem); // select
-                  }
-                }}
+                // onLongPress={(pressedItem) => {
+                //   if (selectedItemToDelete?.id === pressedItem.id) {
+                //     setSelectedItemToDelete(null); // toggle off
+                //   } else {
+                //     setSelectedItemToDelete(pressedItem); // select
+                //   }
+                // }}
               />
 
             )}

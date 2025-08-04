@@ -89,11 +89,15 @@ const styles = StyleSheet.create({
     color: '#888',
     marginBottom: 4,
   },
-  name: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
+name: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  color: '#333',
+  flexShrink: 1, // prevent overflow
+  flexWrap: 'wrap', // allow wrapping
+  maxWidth: 220, // or set according to your layout
+},
+
   amount: {
     fontSize: 16,
     // color: '#007bff',
