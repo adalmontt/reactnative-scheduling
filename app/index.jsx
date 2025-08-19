@@ -73,7 +73,6 @@ const Home = () => {
             <View style={styles.loaderContainer}>
               <ActivityIndicator size="large" color="#007bff" />
               <Text style={{ marginTop: 10, color: '#666' }}>Cargando datos...</Text>
-
             </View>
           ) : error ? (
             <View style={styles.errorContainer}>

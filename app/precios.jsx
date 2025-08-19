@@ -70,7 +70,6 @@ const Precios = () => {
       const response = await fetch(GOOGLE_SHEET_ITEMS_URL);
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
-      console.log(data);
       setData(sortByCategory(data));
       setError(null);
     } catch (err) {

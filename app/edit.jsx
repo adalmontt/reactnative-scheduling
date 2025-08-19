@@ -35,7 +35,6 @@ const Edit = () => {
 
 const isEditMode = !!params.item;
 
-console.log("params at top", params.item);
 
 useEffect(() => {
   if (params?.item) {
@@ -46,8 +45,7 @@ useEffect(() => {
         ? JSON.parse(parsed.extra_services)
         : emptyExtraServices;
 
-console.log("parsed", parsed);
-console.log("extraServices", extraServices);
+
 
       setFormData({
         ...parsed,
@@ -55,7 +53,6 @@ console.log("extraServices", extraServices);
       });
 
       setPreloaded(true);
-        console.log("entro aca good");
 
     } catch (err) {
       console.error('Failed to parse item:', err);
@@ -98,7 +95,6 @@ console.log("extraServices", extraServices);
 
   const handleChange = (name, value, isNested = false) => {
 
-    console.log("changing" , formData);
     setFormData(prev => {
       if (isNested) {
         return {
