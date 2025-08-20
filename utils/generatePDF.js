@@ -106,7 +106,6 @@ export const generateAndSharePDF = async (data) => {
 
   try {
     const { uri } = await Print.printToFileAsync({ html: htmlContent });
-    console.log('PDF generado:', uri);
 
     if (await Sharing.isAvailableAsync()) {
       await Sharing.shareAsync(uri, {

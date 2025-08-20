@@ -66,10 +66,10 @@ const styles = StyleSheet.create({
   titleSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5
   },
   backButton: {
     marginTop: 7,
+    marginRight: 5,
   },
   title: {
     fontSize: 24,

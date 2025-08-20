@@ -19,8 +19,8 @@ const Header = () => {
     <View>
       {/* Header */}
       <View style={styles.container}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' , gap: 10}}>
-          <Ionicons name="leaf-outline" size={20} color="green" />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons name="leaf-outline" size={20} color="green" style={{marginRight: 10}}/>
           <Text style={{ fontFamily: 'PlayfairDisplayItalic', fontSize: 23 }}>Villa Francis</Text>
         </View>
         {/* <TouchableOpacity onPress={toggleMenu}>

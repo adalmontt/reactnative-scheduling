@@ -41,7 +41,7 @@ const Card = ({ item }) => {
 
       <View style={styles.card}>
 
-        <View style={[commonStyles.rowBetweenClose, { gap: 10 }]}>
+        <View style={[commonStyles.rowBetweenClose, { marginTop: 5 }]}>
           <View>
             {/* <EventBadge evento={item.evento} /> */}
             {

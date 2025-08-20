@@ -187,7 +187,7 @@ useEffect(() => {
               <View style={styles.innerRow}>
 
 
-                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                   <InputField
                     value={(item.priceOverride ?? item.precio).toString()}
                     keyboardType="numeric"
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderRadius: 4,
     flexDirection: 'row',
-    gap: 15
+
   },
   headerRow: {
     flexDirection: 'row',

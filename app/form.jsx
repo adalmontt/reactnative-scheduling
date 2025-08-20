@@ -289,7 +289,7 @@ const Form = () => {
         </View>
 
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {Object.entries(servicesState)
             .filter(([_, val]) => val.selected)
             .map(([key, val]) => {

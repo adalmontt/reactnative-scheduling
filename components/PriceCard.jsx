@@ -31,7 +31,7 @@ const PriceCard = ({ item, onLongPress, selected }) => {
                 <Text style={styles.name}>{item.nombre}</Text>
 
                 <View style={commonStyles.rowBetweenClose}>
-                    <Text style={styles.description}>Categoría:</Text>
+                    <Text style={styles.description}>Categoría: </Text>
                     <Text style={[styles.description, { fontWeight: 'bold', fontStyle: 'italic' }]}>
                         {item.categoria}
                     </Text>

@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
     chipsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 8,
+     
     },
 
     chip: {

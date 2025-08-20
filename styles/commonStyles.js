@@ -47,9 +47,8 @@ export const commonStyles = StyleSheet.create({
   },
   rowBetweenClose: {
     flexDirection: 'row',
-    gap: 5,
-    alignItems: 'center',
 
+    alignItems: 'center',
   },
   toggleText: {
     fontWeight: 'bold',
@@ -82,7 +81,7 @@ export const commonStyles = StyleSheet.create({
       chipsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: 8,
+      
     },
 
      chip: {
