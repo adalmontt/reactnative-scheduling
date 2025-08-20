@@ -42,7 +42,7 @@ const Card = ({ item }) => {
       <View style={styles.card}>
 
         <View style={[commonStyles.rowBetweenClose, { marginTop: 5 }]}>
-          <View>
+          <View style={{marginRight: 10 }}>
             {/* <EventBadge evento={item.evento} /> */}
             {
               <View style={{ width: 50, height: 50, backgroundColor: color, alignItems: 'center', justifyContent: 'center', borderRadius: 25 }}>
